@@ -13,7 +13,10 @@ template <class T>
 class SynchronizedQueue
 {
 public:
-    SynchronizedQueue();
+    SynchronizedQueue()
+    {
+
+    }
 
     void push_back(const T& item)
     {

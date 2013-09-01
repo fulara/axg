@@ -1,9 +1,16 @@
 #pragma once
 
+class GGWrapper;
+class LoginWindow;
+class AliveChecker;
 #include "WtForwards.h"
 #include "Wt/WApplication"
 
-class GGWrapper;
+#include <boost/shared_ptr.hpp>
+
+#include "event.h"
+
+
 
 class AxgApplication : public Wt::WApplication
 {
@@ -13,9 +20,9 @@ public:
 private:
 
     GGWrapper *mpWrapper;
-    Wt::WLineEdit *mpUinEdit;
-    Wt::WLineEdit *mpPassEdit;
-    Wt::WPushButton *mpLoginButton;
+    LoginWindow *mpLoginWindow;
+    AliveChecker *mpAliveChecker;
+
     void initJSScripts();
     void initConnections();
     Wt::JSignal<void> *mpWindowUnloadSignal;
@@ -23,6 +30,10 @@ private:
 ///// SLOTS
 /////////////////////////////////////////////
     void onWindowUnload();
-    void onLoginResult(bool status);
+    void onQuitRequested();
+    void onEvent(boost::shared_ptr<Event>);
+    void onEventUIThread(boost::shared_ptr<Event>);
+    void onLoginResult(boost::shared_ptr<Event> event);
+
 
 };

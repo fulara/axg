@@ -3,6 +3,7 @@
 
 template <class T>
 class SynchronizedQueue;
+
 struct ggEvent;
 struct ggLoginEvent;
 struct gg_session;
@@ -12,7 +13,10 @@ struct gg_session;
 #include <boost/any.hpp>
 #include <Wt/WSignal>
 #include <Wt/WJavaScript>
+#include <boost/thread.hpp>
+#include <boost/shared_ptr.hpp>
 #include "WtForwards.h"
+#include "event.h"
 
 class GGWrapper
 {
@@ -24,13 +28,14 @@ public:
     void connect(unsigned int uin,const std::string &pass);
     void sendMessage(unsigned int targetUin,const std::string &content);
 
-    Wt::Signal<bool> &loginResultSignal();
+    Wt::Signal<boost::shared_ptr<Event> > &eventSignal();
 private:
     volatile bool mIsCancelled;
     volatile bool mIsInsideProcessingLoop;
     gg_session *mpSession;
     SynchronizedQueue<ggEvent> *mpQueue;
-    Wt::Signal<bool> *mpLoginResultSignal;
+    Wt::Signal<boost::shared_ptr<Event> > *mpEventSignal;
+    boost::thread mWorkerThread;
 
     void enterLoop();
     void processEvent(ggEvent& event);

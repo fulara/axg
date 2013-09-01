@@ -13,8 +13,9 @@ void Logger::log(std::string toLog)
     std::ofstream out;
     out.open("axg.out",std::ofstream::out | std::ofstream::app);
 
-    out << toLog;
+    out << toLog << "\n";
 
     out.close();
 
 }
+

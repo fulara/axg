@@ -7,7 +7,9 @@ QMAKE_CXXFLAGS +=  -std=c++0x
 SOURCES += main.cpp \
     axgapplication.cpp \
     logger.cpp \
-    ggwrapper.cpp
+    ggwrapper.cpp \
+    Ui/loginwindow.cpp \
+    alivechecker.cpp
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../libgadu/build-libgadu-Desktop_Qt_5_1_1_GCC_32bit-Release/release/ -llibgadu
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../libgadu/build-libgadu-Desktop_Qt_5_1_1_GCC_32bit-Release/debug/ -llibgadu
@@ -30,7 +32,11 @@ HEADERS += \
     ggwrapper.h \
     ggevent.h \
     ggloginevent.h \
-    synchronizedqueue.h
+    synchronizedqueue.h \
+    event.h \
+    loginresultevent.h \
+    Ui/loginwindow.h \
+    alivechecker.h
 
 
 unix:!macx: LIBS += -L$$PWD/../../../libs/wt-3.3.0/build/src/ -lwt

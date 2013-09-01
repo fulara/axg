@@ -6,4 +6,5 @@ namespace Wt
     class WLineEdit;
     class WPushButton;
     class WText;
+    class WTimer;
 }

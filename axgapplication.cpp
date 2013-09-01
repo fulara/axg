@@ -6,6 +6,7 @@
 #include "Wt/WJavaScript"
 #include "Wt/WMessageBox"
 #include "Wt/WLogger"
+#include "Wt/WServer"
 #include <boost/lexical_cast.hpp>
 #include <boost/functional.hpp>
 #include <sstream>
@@ -14,29 +15,29 @@
 #include "axgapplication.h"
 #include "logger.h"
 #include "ggwrapper.h"
+#include "loginresultevent.h"
+#include "Ui/loginwindow.h"
+#include "alivechecker.h"
 
 using namespace Wt;
 
 AxgApplication::AxgApplication(const Wt::WEnvironment& env)
   : WApplication(env),
     mpWrapper(new GGWrapper()),
-    mpWindowUnloadSignal(new Wt::JSignal<void>(this,"WindowUnloadSignal"))
-
+    mpWindowUnloadSignal(new Wt::JSignal<void>(this,"WindowUnloadSignal")),
+    mpLoginWindow(new LoginWindow(root())),
+    mpAliveChecker(new AliveChecker(root()))
 {
     setTitle("AxG");
     initConnections();
     initJSScripts();
-    //mpUinEdit = new Wt::WLineEdit(root());
-    //mpPassEdit = new Wt::WLineEdit(root());
-    //mpLoginButton = new Wt::WPushButton("Logg In", root());
-    //mpLoginButton->clicked().connect(boost::bind<void>([=]() {
-    //    mpWrapper->connect(boost::lexical_cast<unsigned int>(mpUinEdit->text().narrow()),mpPassEdit->text().narrow());
-    //}));
 
 
 
 
 
+
+    this->useStyleSheet("style/style.css");
 }
 AxgApplication::~AxgApplication()
 {
@@ -49,7 +50,6 @@ void AxgApplication::initJSScripts()
     std::stringstream ss;
 
     ss << "window.onbeforeunload =function(){" <<mpWindowUnloadSignal->createCall() << "};";
-    //ss << "window.addEventListener('resize',function(event) {" << mpWindowUnloadSignal->createCall() << "});";
     doJavaScript(ss.str());
 }
 
@@ -57,17 +57,56 @@ void AxgApplication::initJSScripts()
 void AxgApplication::initConnections()
 {
     mpWindowUnloadSignal->connect(this,&AxgApplication::onWindowUnload);
-    mpWrapper->loginResultSignal().connect(this,&AxgApplication::onLoginResult);
+    mpWrapper->eventSignal().connect(this,&AxgApplication::onEvent);
+    mpLoginWindow->loginSignal().connect(boost::bind(&GGWrapper::connect,mpWrapper,_1,_2));
+    mpAliveChecker->died().connect(this,&AxgApplication::onQuitRequested);
 }
 
 
 void AxgApplication::onWindowUnload()
 {
-    Logger::log("Unload called \n");
-  //  quit();
+    //Logger::log("Unload called \n");
+    //quit();
 
 }
-void AxgApplication::onLoginResult(bool status)
+void AxgApplication::onQuitRequested()
 {
-    Wt::WMessageBox::show("Loggin Result",Wt::WString("Logged In?") + boost::lexical_cast<std::wstring>(status),Ok);
+    Logger::log("Quit Requested.. pushing onto UI");
+    Wt::WServer::instance()->post(sessionId(),boost::bind(&AxgApplication::quit,this));
+}
+
+//called on wrong thread has to be pushed to UI.
+void AxgApplication::onEvent(boost::shared_ptr<Event> event)
+{
+    //push Event To UI
+    Logger::log("Got Event WorkEr Thread");
+    Wt::WServer::instance()->post(sessionId(),
+                                  boost::bind<void>(
+                                      [this,event]()
+    {
+        onLoginResult(event);
+    }));
+}
+void AxgApplication::onEventUIThread(boost::shared_ptr<Event> event)
+{
+    switch(event->type)
+    {
+        case Event::LoginResult:
+            //
+        break;
+    }
+}
+
+void AxgApplication::onLoginResult(boost::shared_ptr<Event> event)
+{
+    LoginResultEvent* loginResultEvent = static_cast<LoginResultEvent*>(event.get());
+    if(loginResultEvent->wasLoginSuccesfull)
+    {
+
+      //  Wt::WMessageBox msgBox("Siemka user","Udalo ci sie zalogowac",Ok,this);
+        doJavaScript("alert(\"Udalo ci sie zalogowac\");");
+
+    }
+    else
+        doJavaScript("alert(\"Failed Login attempt NYGGA\");");
 }

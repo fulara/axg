@@ -6,21 +6,27 @@
 #include "synchronizedqueue.h"
 #include "ggevent.h"
 #include "ggloginevent.h"
+#include "logger.h"
 
+#include "loginresultevent.h"
+
+typedef boost::shared_ptr<Event> spEvent;
 GGWrapper::GGWrapper()
-    : mpSession(NULL),
-      mpLoginResultSignal(new Wt::Signal<bool>()),
-      mIsCancelled(false),
-      mIsInsideProcessingLoop(false)
+    : mIsCancelled(false),
+      mIsInsideProcessingLoop(false),
+      mpSession(NULL),
+      mpQueue( new SynchronizedQueue<ggEvent>()),
+      mpEventSignal(new Wt::Signal<boost::shared_ptr<Event>>())
 {
     gg_debug_level = 255;
+    mWorkerThread = boost::thread(boost::bind(&GGWrapper::enterLoop,this));
 }
-
 GGWrapper::~GGWrapper()
 {
+    delete mpEventSignal;
     mIsCancelled = true;
     while(mIsInsideProcessingLoop) boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
-
+    mWorkerThread.join();
     if(mpSession)
     {
         gg_free_session(mpSession);
@@ -35,6 +41,7 @@ void GGWrapper::connect(unsigned int uin, const std::string &pass)
 }
 void GGWrapper::enterLoop()
 {
+
     mIsInsideProcessingLoop = true;
     while(!mIsCancelled)
     {
@@ -43,7 +50,7 @@ void GGWrapper::enterLoop()
             continue;
         processEvent(boost::any_cast<ggEvent&>(item));
     }
-
+    Logger::log("Finished Looping!");
     mIsInsideProcessingLoop = false;
     //probably here some cleaning or just do everything in destructor;
 }
@@ -64,12 +71,18 @@ void GGWrapper::processEvent(ggEvent &event)
 void GGWrapper::processLoginEvent(ggLoginEvent &event)
 {
     struct gg_login_params p;
+    memset(&p,0,sizeof(gg_login_params));
     p.uin = event.uin;
     p.password = const_cast<char *>(event.pass.c_str());
-    if(mpSession = gg_login(&p))
-    {
 
+    if((mpSession = gg_login(&p)))
+    {
+        ;
+        //eventSignal().emit(spEvent(new LoginResultEvent(true)));
+        eventSignal().emit(spEvent(new LoginResultEvent(true)));
     }
+    else
+        eventSignal().emit(spEvent(new LoginResultEvent(false)));
 }
 
 void GGWrapper::addToEventLoop(const ggEvent &event)
@@ -78,7 +91,7 @@ void GGWrapper::addToEventLoop(const ggEvent &event)
 }
 
 
-Wt::Signal<bool> &GGWrapper::loginResultSignal()
+Wt::Signal<spEvent> &GGWrapper::eventSignal()
 {
-    return *mpLoginResultSignal;
+    return *mpEventSignal;
 }
