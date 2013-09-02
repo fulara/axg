@@ -4,7 +4,7 @@
 class Event
 {
 public:
-    enum EventType { LoginResult};
+    enum EventType { LoginResult,MessageRcv};
     //fake arg because of amiguity ..
     Event(EventType type,bool fakeArg) : type(type)
     {

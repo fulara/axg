@@ -18,15 +18,17 @@
 #include "loginresultevent.h"
 #include "Ui/loginwindow.h"
 #include "alivechecker.h"
+#include "Ui/dialogwindow.h"
+#include "messageevent.h"
 
 using namespace Wt;
 
 AxgApplication::AxgApplication(const Wt::WEnvironment& env)
   : WApplication(env),
     mpWrapper(new GGWrapper()),
-    mpWindowUnloadSignal(new Wt::JSignal<void>(this,"WindowUnloadSignal")),
     mpLoginWindow(new LoginWindow(root())),
-    mpAliveChecker(new AliveChecker(root()))
+    mpAliveChecker(new AliveChecker(root())),
+    mpWindowUnloadSignal(new Wt::JSignal<void>(this,"WindowUnloadSignal"))
 {
     setTitle("AxG");
     initConnections();
@@ -60,6 +62,7 @@ void AxgApplication::initConnections()
     mpWrapper->eventSignal().connect(this,&AxgApplication::onEvent);
     mpLoginWindow->loginSignal().connect(boost::bind(&GGWrapper::connect,mpWrapper,_1,_2));
     mpAliveChecker->died().connect(this,&AxgApplication::onQuitRequested);
+
 }
 
 
@@ -84,7 +87,8 @@ void AxgApplication::onEvent(boost::shared_ptr<Event> event)
                                   boost::bind<void>(
                                       [this,event]()
     {
-        onLoginResult(event);
+        onEventUIThread(event);
+
     }));
 }
 void AxgApplication::onEventUIThread(boost::shared_ptr<Event> event)
@@ -92,9 +96,17 @@ void AxgApplication::onEventUIThread(boost::shared_ptr<Event> event)
     switch(event->type)
     {
         case Event::LoginResult:
-            //
-        break;
+            onLoginResult(event);
+            break;
+        case Event::MessageRcv:
+            onMessageRcv(event);
+            break;
     }
+}
+void AxgApplication::onMessageRcv(boost::shared_ptr<Event> event)
+{
+    MessageEvent *msgEvent = static_cast<MessageEvent*>(event.get());
+    this->mpDialogWindow->messageReceived(msgEvent);
 }
 
 void AxgApplication::onLoginResult(boost::shared_ptr<Event> event)
@@ -102,10 +114,9 @@ void AxgApplication::onLoginResult(boost::shared_ptr<Event> event)
     LoginResultEvent* loginResultEvent = static_cast<LoginResultEvent*>(event.get());
     if(loginResultEvent->wasLoginSuccesfull)
     {
-
-      //  Wt::WMessageBox msgBox("Siemka user","Udalo ci sie zalogowac",Ok,this);
-        doJavaScript("alert(\"Udalo ci sie zalogowac\");");
-
+        root()->removeWidget(mpLoginWindow);
+        mpDialogWindow = new DialogWindow(this->root());
+        mpDialogWindow->sendMessageRequest().connect(boost::bind(&GGWrapper::sendMessage,mpWrapper,_1,_2));
     }
     else
         doJavaScript("alert(\"Failed Login attempt NYGGA\");");

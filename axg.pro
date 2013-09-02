@@ -9,7 +9,10 @@ SOURCES += main.cpp \
     logger.cpp \
     ggwrapper.cpp \
     Ui/loginwindow.cpp \
-    alivechecker.cpp
+    alivechecker.cpp \
+    Ui/dialogwindow.cpp \
+    Ui/chathistory.cpp \
+    Ui/historyentry.cpp
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../libgadu/build-libgadu-Desktop_Qt_5_1_1_GCC_32bit-Release/release/ -llibgadu
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../libgadu/build-libgadu-Desktop_Qt_5_1_1_GCC_32bit-Release/debug/ -llibgadu
@@ -36,7 +39,12 @@ HEADERS += \
     event.h \
     loginresultevent.h \
     Ui/loginwindow.h \
-    alivechecker.h
+    alivechecker.h \
+    Ui/dialogwindow.h \
+    Ui/chathistory.h \
+    Ui/historyentry.h \
+    ggmessageevent.h \
+    messageevent.h
 
 
 unix:!macx: LIBS += -L$$PWD/../../../libs/wt-3.3.0/build/src/ -lwt

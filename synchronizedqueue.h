@@ -30,7 +30,7 @@ public:
     }
 
     //time out in ms
-    boost::any poll(int timeOut = 200)
+    boost::any poll(int timeOut = 40)
     {
         const int sleepPeriod = 10;
         while(timeOut)

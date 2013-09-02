@@ -7,4 +7,9 @@ namespace Wt
     class WPushButton;
     class WText;
     class WTimer;
+    class WTable;
+    class WContainerWidget;
+    class WLabel;
+    class WText;
+    class WScrollArea;
 }

@@ -7,7 +7,9 @@ class SynchronizedQueue;
 struct ggEvent;
 struct ggLoginEvent;
 struct gg_session;
-
+struct gg_event;
+struct gg_event_msg;
+struct ggMessageEvent;
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/any.hpp>
@@ -30,18 +32,27 @@ public:
 
     Wt::Signal<boost::shared_ptr<Event> > &eventSignal();
 private:
-    volatile bool mIsCancelled;
-    volatile bool mIsInsideProcessingLoop;
     gg_session *mpSession;
     SynchronizedQueue<ggEvent> *mpQueue;
     Wt::Signal<boost::shared_ptr<Event> > *mpEventSignal;
     boost::thread mWorkerThread;
+    boost::posix_time::ptime mTimeSinceLastPing;
 
     void enterLoop();
+    gg_event* pollGGEvent();
     void processEvent(ggEvent& event);
-    void processLoginEvent(ggLoginEvent& event);
-    void addToEventLoop(const ggEvent&);
+    void processGGEvent(gg_event &ev);
 
+    void addToEventLoop(const ggEvent&);
+    void sendPing();
+
+
+    //process gg events methods.
+    void onRecvMsg(gg_event_msg& msg);
+
+    //process internal events.
+    void processLoginEvent(ggLoginEvent& event);
+    void processMessageEvent(ggMessageEvent &event);
 };
 
 #endif // GGWRAPPER_H
