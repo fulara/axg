@@ -20,21 +20,29 @@
 #include "alivechecker.h"
 #include "Ui/dialogwindow.h"
 #include "messageevent.h"
-
+#include "Ui/contactlist.h"
+#include "Ui/contactwindow.h"
 using namespace Wt;
 
+
+#define LAYOUT_TEST1
 AxgApplication::AxgApplication(const Wt::WEnvironment& env)
   : WApplication(env),
     mpWrapper(new GGWrapper()),
+    #ifndef LAYOUT_TEST
     mpLoginWindow(new LoginWindow(root())),
+    #else
+    mpDialogWindow(new DialogWindow(root())),
+    mpContactWindow(new ContactWindow(root())),
+    #endif
     mpAliveChecker(new AliveChecker(root())),
+
     mpWindowUnloadSignal(new Wt::JSignal<void>(this,"WindowUnloadSignal"))
 {
+    enableUpdates();
     setTitle("AxG");
     initConnections();
     initJSScripts();
-
-
 
 
 
@@ -53,6 +61,8 @@ void AxgApplication::initJSScripts()
 
     ss << "window.onbeforeunload =function(){" <<mpWindowUnloadSignal->createCall() << "};";
     doJavaScript(ss.str());
+
+    require("./scripts/globals.js");
 }
 
 
@@ -60,7 +70,9 @@ void AxgApplication::initConnections()
 {
     mpWindowUnloadSignal->connect(this,&AxgApplication::onWindowUnload);
     mpWrapper->eventSignal().connect(this,&AxgApplication::onEvent);
+    #ifndef LAYOUT_TEST
     mpLoginWindow->loginSignal().connect(boost::bind(&GGWrapper::connect,mpWrapper,_1,_2));
+    #endif
     mpAliveChecker->died().connect(this,&AxgApplication::onQuitRequested);
 
 }
@@ -83,16 +95,18 @@ void AxgApplication::onEvent(boost::shared_ptr<Event> event)
 {
     //push Event To UI
     Logger::log("Got Event WorkEr Thread");
-    Wt::WServer::instance()->post(sessionId(),
+  /*  Wt::WServer::instance()->post(sessionId(),
                                   boost::bind<void>(
                                       [this,event]()
-    {
+    {*/
         onEventUIThread(event);
 
-    }));
+    //}));
+
 }
 void AxgApplication::onEventUIThread(boost::shared_ptr<Event> event)
 {
+    auto lock = UpdateLock(this);
     switch(event->type)
     {
         case Event::LoginResult:
@@ -102,6 +116,7 @@ void AxgApplication::onEventUIThread(boost::shared_ptr<Event> event)
             onMessageRcv(event);
             break;
     }
+    triggerUpdate();
 }
 void AxgApplication::onMessageRcv(boost::shared_ptr<Event> event)
 {
@@ -117,6 +132,7 @@ void AxgApplication::onLoginResult(boost::shared_ptr<Event> event)
         root()->removeWidget(mpLoginWindow);
         mpDialogWindow = new DialogWindow(this->root());
         mpDialogWindow->sendMessageRequest().connect(boost::bind(&GGWrapper::sendMessage,mpWrapper,_1,_2));
+        mpContactWindow = new ContactWindow(root());
     }
     else
         doJavaScript("alert(\"Failed Login attempt NYGGA\");");

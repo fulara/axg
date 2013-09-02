@@ -105,6 +105,8 @@ void GGWrapper::sendMessage(unsigned int targetUin, const std::string &content)
 
 void GGWrapper::sendPing()
 {
+    if(mpSession == NULL)
+        return;
     auto timeNow = boost::posix_time::second_clock::local_time();
     boost::posix_time::time_duration durationSinceLastPing(timeNow - mTimeSinceLastPing);
     if(durationSinceLastPing.minutes() > 2)
@@ -174,6 +176,12 @@ void GGWrapper::processGGEvent(gg_event &ev)
             if ( -1 != gg_notify(mpSession,NULL,0))
             {
                 eventSignal().emit(spEvent(new LoginResultEvent(true)));
+
+
+                if ( -1 != gg_userlist100_request(mpSession,GG_USERLIST100_GET,0,GG_USERLIST100_FORMAT_TYPE_GG70,0))
+                {
+                    Logger::log("Succesfully requested userlist..?");
+                }
             }
 
             break;

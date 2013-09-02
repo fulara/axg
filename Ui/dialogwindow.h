@@ -27,10 +27,11 @@ private:
     Wt::WPushButton *mpSendMessageButton;
 
     Wt::Signal<unsigned int, std::string> *mpSendMessageSignal;
+    Wt::JSignal<std::string> *mpTextAreaEnterSignal;
 
-
-
-    void onSendRequest();
+    void initOnKeyUpJSTextArea();
+    void onTextAreaEnterPress(std::string content);
+    void onSendButton();
 
 };
 

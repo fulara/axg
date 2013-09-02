@@ -12,7 +12,10 @@ SOURCES += main.cpp \
     alivechecker.cpp \
     Ui/dialogwindow.cpp \
     Ui/chathistory.cpp \
-    Ui/historyentry.cpp
+    Ui/historyentry.cpp \
+    Ui/contactlist.cpp \
+    Ui/contactentry.cpp \
+    Ui/contactwindow.cpp
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../libgadu/build-libgadu-Desktop_Qt_5_1_1_GCC_32bit-Release/release/ -llibgadu
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../libgadu/build-libgadu-Desktop_Qt_5_1_1_GCC_32bit-Release/debug/ -llibgadu
@@ -44,7 +47,10 @@ HEADERS += \
     Ui/chathistory.h \
     Ui/historyentry.h \
     ggmessageevent.h \
-    messageevent.h
+    messageevent.h \
+    Ui/contactlist.h \
+    Ui/contactentry.h \
+    Ui/contactwindow.h
 
 
 unix:!macx: LIBS += -L$$PWD/../../../libs/wt-3.3.0/build/src/ -lwt

@@ -4,6 +4,8 @@ class GGWrapper;
 class LoginWindow;
 class AliveChecker;
 class DialogWindow;
+class ContactList;
+class ContactWindow;
 #include "WtForwards.h"
 #include "Wt/WApplication"
 
@@ -24,6 +26,7 @@ private:
     LoginWindow *mpLoginWindow;
     AliveChecker *mpAliveChecker;
     DialogWindow *mpDialogWindow;
+    ContactWindow *mpContactWindow;
     Wt::JSignal<void> *mpWindowUnloadSignal;
     void initJSScripts();
     void initConnections();

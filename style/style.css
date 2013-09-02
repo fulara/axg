@@ -11,16 +11,41 @@
 	height: 150px;
 	width: 150px;
 }
+.ContactWindow
+{
+        background-color:#b0cfde;
+	position:relative;
+}
+.ContactList
+{
+	background-color:#d0d4de;
+	display:block;
+	position: absolute;
+	bottom: 2.5%;
+	left: 2.5%;
+	width: 95%;
+	height: 90%;
+
+}
+.ContactEntry
+{
+	background-color: #F8F8F8;
+	position: relative;
+	margin-left: auto;
+	margin-right: auto;
+	height: 10%;
+	width: 95%;
+}
 .MsgBox
 {
 	background-color:#fff;
 }
 .DialogWindow
 {
-	width: 25%;
-	height: 25%;
 	background-color:#b0c4de;
-
+	position: fixed;
+        left: 40%;
+	margin-left: -200px;
 }
 .DialogWindowTargetInfo
 {
@@ -40,13 +65,10 @@
 
 	margin-left: auto;
 	margin-right: auto;
-	height: 350px;
-	width:95%;
 	background-color:#FFFFF2;
 }
 .DialogWindowChatHistory
 {
-	table-layout:fixed;
 	width:100%;
 	background-color:#f0f0f0;
 }

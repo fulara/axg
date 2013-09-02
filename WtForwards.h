@@ -12,4 +12,5 @@ namespace Wt
     class WLabel;
     class WText;
     class WScrollArea;
+    class WBoxLayout;
 }
