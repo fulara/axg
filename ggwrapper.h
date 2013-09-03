@@ -9,6 +9,7 @@ struct ggLoginEvent;
 struct gg_session;
 struct gg_event;
 struct gg_event_msg;
+struct gg_event_user_data;
 struct ggMessageEvent;
 #include <string>
 #include <boost/shared_ptr.hpp>
@@ -49,6 +50,7 @@ private:
 
     //process gg events methods.
     void onRecvMsg(gg_event_msg& msg);
+    void onRecvContacts(gg_event_user_data& data);
 
     //process internal events.
     void processLoginEvent(ggLoginEvent& event);

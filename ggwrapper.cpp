@@ -141,6 +141,11 @@ void GGWrapper::onRecvMsg(gg_event_msg& msg)
     //toLog += std::string((const char*)msg.message);
     Logger::log(toLog);
 }
+void GGWrapper::onRecvContacts(gg_event_user_data &data)
+{
+    int userCount = data.user_count;
+
+}
 
 void GGWrapper::processGGEvent(gg_event &ev)
 {
@@ -178,7 +183,7 @@ void GGWrapper::processGGEvent(gg_event &ev)
                 eventSignal().emit(spEvent(new LoginResultEvent(true)));
 
 
-                if ( -1 != gg_userlist100_request(mpSession,GG_USERLIST100_GET,0,GG_USERLIST100_FORMAT_TYPE_GG70,0))
+                if ( -1 != gg_userlist100_request(mpSession,GG_USERLIST100_GET,0,GG_USERLIST100_FORMAT_TYPE_GG100,0))
                 {
                     Logger::log("Succesfully requested userlist..?");
                 }
@@ -278,6 +283,7 @@ void GGWrapper::processGGEvent(gg_event &ev)
             Logger::log("Received GG_EVENT_TYPING_NOTIFICATION\n");
             break;
         case GG_EVENT_USER_DATA:		/**< Informacja o kontaktach */
+            onRecvContacts(reinterpret_cast<gg_event_user_data&>(ev.event));
             Logger::log("Received GG_EVENT_USER_DATA\n");
             break;
         case GG_EVENT_MULTILOGON_MSG:	/**< Wiadomosc wyslana z innej sesji multilogowania */

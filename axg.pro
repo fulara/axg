@@ -1,9 +1,11 @@
+QMAKE_LIBS_QT_OPENGL
 TEMPLATE = app
 CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 QMAKE_CXXFLAGS +=  -std=c++0x
 
+unix:!macx:
 SOURCES += main.cpp \
     axgapplication.cpp \
     logger.cpp \
@@ -53,28 +55,93 @@ HEADERS += \
     Ui/contactwindow.h
 
 
-unix:!macx: LIBS += -L$$PWD/../../../libs/wt-3.3.0/build/src/ -lwt
+QMAKE_CXXFLAGS += -lssl
+QMAKE_CXXFLAGS += -lcrypto
 
-INCLUDEPATH += $$PWD/../../../libs/wt-3.3.0/includes
-DEPENDPATH += $$PWD/../../../libs/wt-3.3.0/includes
+
+
+
 
 
 unix:!macx: LIBS += -L$$PWD/../../../libs/wt-3.3.0/build/src/http/ -lwthttp
 
 INCLUDEPATH += $$PWD/../../../libs/wt-3.3.0/includes
-DEPENDPATH += $$PWD/../../../libs/wt-3.3.0/includes
+DEPENDPATH += $$PWD/../../../libs/wt-3.3.0/build/src/http
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/wt-3.3.0/build/src/http/libwthttp.a
+
+unix:!macx: LIBS += -L$$PWD/../../../libs/wt-3.3.0/build/src/ -lwt
+
+INCLUDEPATH += $$PWD/../../../libs/wt-3.3.0/includes
+DEPENDPATH += $$PWD/../../../libs/wt-3.3.0/build/src
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/wt-3.3.0/build/src/libwt.a
 
 unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53/stage/lib/ -lboost_signals
 
 INCLUDEPATH += $$PWD/../../../libs/boost_1_53
 DEPENDPATH += $$PWD/../../../libs/boost_1_53
 
-unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53/stage/lib/ -lboost_thread
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53/stage/lib/libboost_signals.a
 
-INCLUDEPATH += $$PWD/../../../libs/boost_1_53
-DEPENDPATH += $$PWD/../../../libs/boost_1_53
+
 
 unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53/stage/lib/ -lboost_system
 
 INCLUDEPATH += $$PWD/../../../libs/boost_1_53
 DEPENDPATH += $$PWD/../../../libs/boost_1_53
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53/stage/lib/libboost_system.a
+
+
+
+unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53/stage/lib/ -lboost_thread
+
+INCLUDEPATH += $$PWD/../../../libs/boost_1_53
+DEPENDPATH += $$PWD/../../../libs/boost_1_53
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53/stage/lib/libboost_thread.a
+
+
+unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53/stage/lib/ -lboost_date_time
+
+INCLUDEPATH += $$PWD/../../../libs/boost_1_53
+DEPENDPATH += $$PWD/../../../libs/boost_1_53
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53/stage/lib/libboost_date_time.a
+
+
+
+unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53/stage/lib/ -lboost_regex
+
+INCLUDEPATH += $$PWD/../../../libs/boost_1_53
+DEPENDPATH += $$PWD/../../../libs/boost_1_53
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53/stage/lib/libboost_regex.a
+
+
+unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53/stage/lib/ -lboost_random
+
+INCLUDEPATH += $$PWD/../../../libs/boost_1_53
+DEPENDPATH += $$PWD/../../../libs/boost_1_53
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53/stage/lib/libboost_random.a
+
+
+unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53/stage/lib/ -lboost_filesystem
+
+INCLUDEPATH += $$PWD/../../../libs/boost_1_53
+DEPENDPATH += $$PWD/../../../libs/boost_1_53
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53/stage/lib/libboost_filesystem.a
+
+unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53/stage/lib/ -lboost_program_options
+
+INCLUDEPATH += $$PWD/../../../libs/boost_1_53
+DEPENDPATH += $$PWD/../../../libs/boost_1_53
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53/stage/lib/libboost_program_options.a
+
+LIBS += -lpthread
+LIBS += -lrt
+LIBS += -lssl
