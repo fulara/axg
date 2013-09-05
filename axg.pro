@@ -19,16 +19,7 @@ SOURCES += main.cpp \
     Ui/contactentry.cpp \
     Ui/contactwindow.cpp
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../libgadu/build-libgadu-Desktop_Qt_5_1_1_GCC_32bit-Release/release/ -llibgadu
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../libgadu/build-libgadu-Desktop_Qt_5_1_1_GCC_32bit-Release/debug/ -llibgadu
-else:unix: LIBS += -L$$PWD/../../libgadu/build-libgadu-Desktop_Qt_5_1_1_GCC_32bit-Release/ -llibgadu
 
-INCLUDEPATH += $$PWD/../../libgadu/libgadu/include
-DEPENDPATH += $$PWD/../../libgadu/libgadu/include
-
-win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../libgadu/build-libgadu-Desktop_Qt_5_1_1_GCC_32bit-Release/release/libgadu.lib
-else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../libgadu/build-libgadu-Desktop_Qt_5_1_1_GCC_32bit-Release/debug/libgadu.lib
-else:unix: PRE_TARGETDEPS += $$PWD/../../libgadu/build-libgadu-Desktop_Qt_5_1_1_GCC_32bit-Release/liblibgadu.a
 
 
 
@@ -52,13 +43,22 @@ HEADERS += \
     messageevent.h \
     Ui/contactlist.h \
     Ui/contactentry.h \
-    Ui/contactwindow.h
+    Ui/contactwindow.h \
+    contactinfo.h \
+    ContactGroup.h \
+    ContactImportEvent.h
 
 
-QMAKE_CXXFLAGS += -lssl
-QMAKE_CXXFLAGS += -lcrypto
+
+unix:!macx: LIBS += -L$$PWD/../../libgadu/deploy/ -llibgadu
+
+INCLUDEPATH += $$PWD/../../libgadu/libgadu/include
+DEPENDPATH += $$PWD/../../libgadu/libgadu/include
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../libgadu/deploy/liblibgadu.a
 
 
+INCLUDEPATH += /home/fular/includes/
 
 
 
@@ -77,71 +77,82 @@ DEPENDPATH += $$PWD/../../../libs/wt-3.3.0/build/src
 
 unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/wt-3.3.0/build/src/libwt.a
 
-unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53/stage/lib/ -lboost_signals
+unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53_0/stage/lib/ -lboost_signals
 
-INCLUDEPATH += $$PWD/../../../libs/boost_1_53
-DEPENDPATH += $$PWD/../../../libs/boost_1_53
+INCLUDEPATH += $$PWD/../../../libs/boost_1_53_0
+DEPENDPATH += $$PWD/../../../libs/boost_1_53_0
 
-unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53/stage/lib/libboost_signals.a
-
-
-
-unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53/stage/lib/ -lboost_system
-
-INCLUDEPATH += $$PWD/../../../libs/boost_1_53
-DEPENDPATH += $$PWD/../../../libs/boost_1_53
-
-unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53/stage/lib/libboost_system.a
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53_0/stage/lib/libboost_signals.a
 
 
 
-unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53/stage/lib/ -lboost_thread
+unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53_0/stage/lib/ -lboost_system
 
-INCLUDEPATH += $$PWD/../../../libs/boost_1_53
-DEPENDPATH += $$PWD/../../../libs/boost_1_53
+INCLUDEPATH += $$PWD/../../../libs/boost_1_53_0
+DEPENDPATH += $$PWD/../../../libs/boost_1_53_0
 
-unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53/stage/lib/libboost_thread.a
-
-
-unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53/stage/lib/ -lboost_date_time
-
-INCLUDEPATH += $$PWD/../../../libs/boost_1_53
-DEPENDPATH += $$PWD/../../../libs/boost_1_53
-
-unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53/stage/lib/libboost_date_time.a
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53_0/stage/lib/libboost_system.a
 
 
 
-unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53/stage/lib/ -lboost_regex
+unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53_0/stage/lib/ -lboost_thread
 
-INCLUDEPATH += $$PWD/../../../libs/boost_1_53
-DEPENDPATH += $$PWD/../../../libs/boost_1_53
+INCLUDEPATH += $$PWD/../../../libs/boost_1_53_0
+DEPENDPATH += $$PWD/../../../libs/boost_1_53_0
 
-unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53/stage/lib/libboost_regex.a
-
-
-unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53/stage/lib/ -lboost_random
-
-INCLUDEPATH += $$PWD/../../../libs/boost_1_53
-DEPENDPATH += $$PWD/../../../libs/boost_1_53
-
-unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53/stage/lib/libboost_random.a
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53_0/stage/lib/libboost_thread.a
 
 
-unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53/stage/lib/ -lboost_filesystem
+unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53_0/stage/lib/ -lboost_date_time
 
-INCLUDEPATH += $$PWD/../../../libs/boost_1_53
-DEPENDPATH += $$PWD/../../../libs/boost_1_53
+INCLUDEPATH += $$PWD/../../../libs/boost_1_53_0
+DEPENDPATH += $$PWD/../../../libs/boost_1_53_0
 
-unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53/stage/lib/libboost_filesystem.a
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53_0/stage/lib/libboost_date_time.a
 
-unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53/stage/lib/ -lboost_program_options
 
-INCLUDEPATH += $$PWD/../../../libs/boost_1_53
-DEPENDPATH += $$PWD/../../../libs/boost_1_53
 
-unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53/stage/lib/libboost_program_options.a
+unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53_0/stage/lib/ -lboost_regex
+
+INCLUDEPATH += $$PWD/../../../libs/boost_1_53_0
+DEPENDPATH += $$PWD/../../../libs/boost_1_53_0
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53_0/stage/lib/libboost_regex.a
+
+
+unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53_0/stage/lib/ -lboost_random
+
+INCLUDEPATH += $$PWD/../../../libs/boost_1_53_0
+DEPENDPATH += $$PWD/../../../libs/boost_1_53_0
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53_0/stage/lib/libboost_random.a
+
+
+unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53_0/stage/lib/ -lboost_filesystem
+
+INCLUDEPATH += $$PWD/../../../libs/boost_1_53_0
+DEPENDPATH += $$PWD/../../../libs/boost_1_53_0
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53_0/stage/lib/libboost_filesystem.a
+
+unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53_0/stage/lib/ -lboost_program_options
+
+INCLUDEPATH += $$PWD/../../../libs/boost_1_53_0
+DEPENDPATH += $$PWD/../../../libs/boost_1_53_0
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53_0/stage/lib/libboost_program_options.a
 
 LIBS += -lpthread
 LIBS += -lrt
 LIBS += -lssl
+LIBS += -lcrypto
+LIBS += -lz
+LIBS += -ldl
+
+
+unix:!macx: LIBS += -L$$PWD/../../../libs/pugixml/ -lpugixml
+
+INCLUDEPATH += $$PWD/../../../libs/pugixml/includes
+DEPENDPATH += $$PWD/../../../libs/pugixml/includes
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/pugixml/libpugixml.a

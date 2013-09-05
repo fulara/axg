@@ -10,6 +10,7 @@
 #include "historyentry.h"
 #include "logger.h"
 
+
 std::string formatTime(const boost::posix_time::ptime &time)
 {
     boost::posix_time::time_facet* facet = new boost::posix_time::time_facet("%Y%m%d %H:%M:%S");

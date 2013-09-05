@@ -33,4 +33,5 @@ int main(int argc, char **argv)
    * object.
    */
   return WRun(argc, argv, &createApplication);
+
 }

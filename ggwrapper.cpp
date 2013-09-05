@@ -6,6 +6,12 @@
 #include <boost/thread.hpp>
 #include <boost/chrono.hpp>
 #include <Wt/WSignal>
+
+#include <vector>
+#include <map>
+
+#include "pugixml.hpp"
+
 #include "ggwrapper.h"
 #include "synchronizedqueue.h"
 #include "ggevent.h"
@@ -14,8 +20,11 @@
 
 #include "messageevent.h"
 #include "loginresultevent.h"
+#include "contactinfo.h"
+#include "ContactGroup.h"
 #include "ggmessageevent.h"
 
+#include "ContactImportEvent.h"
 typedef boost::shared_ptr<Event> spEvent;
 GGWrapper::GGWrapper()
     :
@@ -122,13 +131,6 @@ void GGWrapper::onRecvMsg(gg_event_msg& msg)
     toLog += boost::lexical_cast<std::string>(msg.sender);
     toLog +="containing :" ;
     toLog += boost::lexical_cast<std::string>(msg.msgclass);
-#define GG_CLASS_QUEUED 0x0001
-#define GG_CLASS_OFFLINE GG_CLASS_QUEUED
-#define GG_CLASS_MSG 0x0004
-#define GG_CLASS_CHAT 0x0008
-#define GG_CLASS_CTCP 0x0010
-#define GG_CLASS_ACK 0x0020
-#define GG_CLASS_EXT GG_CLASS_ACK	/**< Dla kompatybilności wstecz */
     if(msg.msgclass & GG_CLASS_CHAT)
     {
         toLog += "\n content: ";
@@ -141,10 +143,60 @@ void GGWrapper::onRecvMsg(gg_event_msg& msg)
     //toLog += std::string((const char*)msg.message);
     Logger::log(toLog);
 }
-void GGWrapper::onRecvContacts(gg_event_user_data &data)
+void GGWrapper::onRecvOwnInfo(gg_event_user_data &data)
 {
+    return;
+    //for future
     int userCount = data.user_count;
+    std::vector<ContactInfo> contacts;
+    for(int userIndex = 0 ; userIndex < userCount ; ++userIndex)
+    {
+        std::map<std::string,std::string> attributes;
+        gg_event_user_data_user &userData = data.users[userIndex];
+        //Logger::log(std::string("info from: ") + boost::lexical_cast<std::string>(userData.uin));
+        for(int attriIndex = 0 ; attriIndex < userData.attr_count;  ++attriIndex)
+        {
+            gg_event_user_data_attr &attri =  userData.attrs[attriIndex];
+            std::string attriKey(attri.key);
+            std::string attriValue(attri.value);
+        }
 
+    }
+}
+void GGWrapper::onRecvContacts(gg_event_userlist100_reply& data)
+{
+    std::map<std::string,bool> convertSBMap;
+    convertSBMap.insert(std::make_pair("true",1));
+    convertSBMap.insert(std::make_pair("false",0));
+    pugi::xml_document doc;
+    auto parsed = doc.load(data.reply);
+    auto contactBookNode  = doc.child("ContactBook");
+    auto groups = contactBookNode.child("Groups");
+    auto contacts = contactBookNode.child("Contacts");
+    std::list<ContactGroup> groupList;
+    std::map<std::string,std::vector<ContactInfo>> mapContacts;
+    for(auto it = contacts.begin(); it != contacts.end(); ++it)
+    {
+        std::string guid = it->child("Guid").child_value(); // dunno what it is
+        unsigned int uin = boost::lexical_cast<unsigned int>(it->child("GGNumber").child_value());
+        std::string showName = it->child("ShowName").child_value();
+        std::string nickName = it->child("NickName").child_value();
+        bool isBuddy = convertSBMap[it->child("FlagBuddy").child_value()];
+        bool isNormal = convertSBMap[it->child("FlagNormal").child_value()];
+        bool isFriend = convertSBMap[it->child("FlagFriend").child_value()];
+        std::string groupId = it->child("Groups").child("GroupId").child_value();
+        mapContacts[groupId].push_back(ContactInfo(uin,showName,nickName,isBuddy,isNormal,isFriend));
+    }
+    for(auto it = groups.begin(); it != groups.end(); ++it)
+    {
+        auto id = it->child("Id").child_value();
+        auto groupName = it->child("Name").child_value();
+        auto isExpanded = convertSBMap[it->child("IsExpanded").child_value()];
+        auto isRemovable = convertSBMap[it->child("IsRemovable").child_value()];
+        groupList.push_back(ContactGroup(isExpanded,isRemovable,groupName,mapContacts.at(id)));
+    }
+
+    mpEventSignal->emit(spEvent(new ContactImportEvent(groupList)));
 }
 
 void GGWrapper::processGGEvent(gg_event &ev)
@@ -283,7 +335,7 @@ void GGWrapper::processGGEvent(gg_event &ev)
             Logger::log("Received GG_EVENT_TYPING_NOTIFICATION\n");
             break;
         case GG_EVENT_USER_DATA:		/**< Informacja o kontaktach */
-            onRecvContacts(reinterpret_cast<gg_event_user_data&>(ev.event));
+            onRecvOwnInfo(reinterpret_cast<gg_event_user_data&>(ev.event));
             Logger::log("Received GG_EVENT_USER_DATA\n");
             break;
         case GG_EVENT_MULTILOGON_MSG:	/**< Wiadomosc wyslana z innej sesji multilogowania */
@@ -297,6 +349,8 @@ void GGWrapper::processGGEvent(gg_event &ev)
             Logger::log("Received GG_EVENT_USERLIST100_VERSION\n");
             break;
         case GG_EVENT_USERLIST100_REPLY:	/**< Wynik importu lub eksportu listy kontaktów (10.0) */
+            onRecvContacts(reinterpret_cast<gg_event_userlist100_reply&>(ev.event));
+            Logger::log("Received GG_EVENT_USERLIST100_REPLY");
             break;
     }
 }

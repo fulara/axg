@@ -14,7 +14,6 @@ class ContactWindow;
 #include "event.h"
 
 
-
 class AxgApplication : public Wt::WApplication
 {
 public:
@@ -30,6 +29,7 @@ private:
     Wt::JSignal<void> *mpWindowUnloadSignal;
     void initJSScripts();
     void initConnections();
+    static std::clock_t begin;
 
 /////////////////////////////////////////////
 ///// SLOTS
@@ -40,6 +40,7 @@ private:
     void onEventUIThread(boost::shared_ptr<Event>);
     void onLoginResult(boost::shared_ptr<Event> event);
     void onMessageRcv(boost::shared_ptr<Event> event);
+    void onContactImport(boost::shared_ptr<Event> event);
 
 
 };

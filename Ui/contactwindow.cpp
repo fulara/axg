@@ -8,3 +8,8 @@ ContactWindow::ContactWindow(Wt::WContainerWidget *parent)
 
     mpContactList = new ContactList(this);
 }
+
+void ContactWindow::contactsReceived(ContactImportantEvent *ev)
+{
+
+}

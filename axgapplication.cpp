@@ -20,8 +20,10 @@
 #include "alivechecker.h"
 #include "Ui/dialogwindow.h"
 #include "messageevent.h"
+#include "ContactImportEvent.h"
 #include "Ui/contactlist.h"
 #include "Ui/contactwindow.h"
+
 using namespace Wt;
 
 
@@ -94,19 +96,19 @@ void AxgApplication::onQuitRequested()
 void AxgApplication::onEvent(boost::shared_ptr<Event> event)
 {
     //push Event To UI
-    Logger::log("Got Event WorkEr Thread");
-  /*  Wt::WServer::instance()->post(sessionId(),
+    Logger::log("Got Event on Worker Thread");
+    Wt::WServer::instance()->post(sessionId(),
                                   boost::bind<void>(
                                       [this,event]()
-    {*/
+    {
         onEventUIThread(event);
 
-    //}));
+    }));
 
 }
 void AxgApplication::onEventUIThread(boost::shared_ptr<Event> event)
 {
-    auto lock = UpdateLock(this);
+    //auto lock = UpdateLock(this);
     switch(event->type)
     {
         case Event::LoginResult:
@@ -115,9 +117,18 @@ void AxgApplication::onEventUIThread(boost::shared_ptr<Event> event)
         case Event::MessageRcv:
             onMessageRcv(event);
             break;
+        case Event::ContactImport:
+            onContactImport(event);
+            break;
     }
     triggerUpdate();
 }
+void AxgApplication::onContactImport(boost::shared_ptr<Event> event)
+{
+    ContactImportEvent *contactsEvent = static_cast<ContactImportEvent*>(event.get());
+    this->mpContactWindow->contactsReceived(contactsEvent);
+}
+
 void AxgApplication::onMessageRcv(boost::shared_ptr<Event> event)
 {
     MessageEvent *msgEvent = static_cast<MessageEvent*>(event.get());

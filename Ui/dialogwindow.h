@@ -3,6 +3,7 @@
 
 class ChatHistory;
 class MessageEvent;
+class ContactImportEvent;
 #include "WtForwards.h"
 
 #include <Wt/WContainerWidget>
@@ -17,6 +18,7 @@ public:
     Wt::Signal<unsigned int,std::string> &sendMessageRequest();
 
     void messageReceived(MessageEvent *ev);
+
 private:
     unsigned int mTargetUin;
     std::string mTargetName;

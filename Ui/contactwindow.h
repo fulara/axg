@@ -9,7 +9,7 @@ class ContactWindow : public Wt::WContainerWidget
 {
 public:
     ContactWindow(Wt::WContainerWidget *parent);
-
+    void contactsReceived(ContactImportantEvent *ev);
 private:
     ContactList *mpContactList;
 };

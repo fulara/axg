@@ -11,6 +11,7 @@ struct gg_event;
 struct gg_event_msg;
 struct gg_event_user_data;
 struct ggMessageEvent;
+struct gg_event_userlist100_reply;
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/any.hpp>
@@ -50,8 +51,8 @@ private:
 
     //process gg events methods.
     void onRecvMsg(gg_event_msg& msg);
-    void onRecvContacts(gg_event_user_data& data);
-
+    void onRecvOwnInfo(gg_event_user_data &data);
+    void onRecvContacts(gg_event_userlist100_reply& data);
     //process internal events.
     void processLoginEvent(ggLoginEvent& event);
     void processMessageEvent(ggMessageEvent &event);

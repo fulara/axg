@@ -25,7 +25,7 @@ DialogWindow::DialogWindow(Wt::WContainerWidget *parent)
     layout->addWidget(mpTargetInfo);
     mpChatHistory = new ChatHistory(this,layout);
     mTargetUin = 3788407;
-    //mTargetUin = 2577961;
+    mTargetUin = 2577961;
     //mTargetUin = 1067760;
     mpTextArea = new Wt::WTextArea();
     layout->addWidget(mpTextArea);
@@ -100,6 +100,7 @@ void DialogWindow::messageReceived(MessageEvent *ev)
     Logger::log(std::string("Received: ") + ev->content);
     mpChatHistory->addRecvMessage(ev->fromUin,ev->content);
 }
+
 
  Wt::Signal<unsigned int,std::string> &DialogWindow::sendMessageRequest()
 {
