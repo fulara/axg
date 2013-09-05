@@ -20,11 +20,12 @@
 {
 	background-color:#d0d4de;
 	display:block;
-	position: absolute;
-	bottom: 2.5%;
+	top: 15%;
+	position:relative;
 	left: 2.5%;
 	width: 95%;
-	height: 90%;
+	height: 80%;
+	overflow: auto;
 
 }
 .ContactEntry
@@ -34,7 +35,7 @@
 	margin-left: auto;
 	margin-right: auto;
 	height: 10%;
-	width: 95%;
+	width: 100%;
 }
 .MsgBox
 {

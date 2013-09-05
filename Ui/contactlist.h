@@ -8,6 +8,7 @@ class ContactList : public Wt::WContainerWidget
 {
 public:
     ContactList(Wt::WContainerWidget *parent);
+    void addContact(unsigned int uin, std::string showName);
 };
 
 #endif // CONTACTLIST_H

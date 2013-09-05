@@ -10,6 +10,25 @@ ContactList::ContactList(Wt::WContainerWidget *parent)
 
 
     addWidget(new ContactEntry(2577961,"Olek"));
+    addWidget(new ContactEntry(2577961,"Olek"));
+    addWidget(new ContactEntry(2577961,"Olek"));
+    addWidget(new ContactEntry(2577961,"Olek"));
+    addWidget(new ContactEntry(2577961,"Olek"));
+    addWidget(new ContactEntry(2577961,"Olek"));
+    addWidget(new ContactEntry(2577961,"Olek"));
+    addWidget(new ContactEntry(2577961,"Olek"));
+    addWidget(new ContactEntry(2577961,"Olek"));
+    addWidget(new ContactEntry(2577961,"Olek"));
+    addWidget(new ContactEntry(2577961,"Olek"));
+    addWidget(new ContactEntry(2577961,"Olek"));
+    addWidget(new ContactEntry(2577961,"Olek"));
+    addWidget(new ContactEntry(2577961,"Olek"));
+    addWidget(new ContactEntry(2577961,"Olek"));
 
 
+}
+
+void ContactList::addContact(unsigned int uin, std::string showName)
+{
+    addWidget(new ContactEntry(uin,showName));
 }

@@ -2,6 +2,7 @@
 #define CONTACTWINDOW_H
 
 class ContactList;
+class ContactImportEvent;
 #include "WtForwards.h"
 
 #include <Wt/WContainerWidget>
@@ -9,7 +10,7 @@ class ContactWindow : public Wt::WContainerWidget
 {
 public:
     ContactWindow(Wt::WContainerWidget *parent);
-    void contactsReceived(ContactImportantEvent *ev);
+    void contactsReceived(ContactImportEvent *ev);
 private:
     ContactList *mpContactList;
 };

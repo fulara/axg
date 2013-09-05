@@ -27,7 +27,7 @@
 using namespace Wt;
 
 
-#define LAYOUT_TEST1
+#define LAYOUT_TEST
 AxgApplication::AxgApplication(const Wt::WEnvironment& env)
   : WApplication(env),
     mpWrapper(new GGWrapper()),

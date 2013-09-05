@@ -185,15 +185,17 @@ void GGWrapper::onRecvContacts(gg_event_userlist100_reply& data)
         bool isNormal = convertSBMap[it->child("FlagNormal").child_value()];
         bool isFriend = convertSBMap[it->child("FlagFriend").child_value()];
         std::string groupId = it->child("Groups").child("GroupId").child_value();
+        Logger::log(groupId + " groupIdContact");
         mapContacts[groupId].push_back(ContactInfo(uin,showName,nickName,isBuddy,isNormal,isFriend));
     }
     for(auto it = groups.begin(); it != groups.end(); ++it)
     {
-        auto id = it->child("Id").child_value();
+        std::string id = it->child("Id").child_value();
         auto groupName = it->child("Name").child_value();
         auto isExpanded = convertSBMap[it->child("IsExpanded").child_value()];
         auto isRemovable = convertSBMap[it->child("IsRemovable").child_value()];
-        groupList.push_back(ContactGroup(isExpanded,isRemovable,groupName,mapContacts.at(id)));
+        Logger::log(id + " groupIdGroups");
+        groupList.push_back(ContactGroup(isExpanded,isRemovable,groupName,mapContacts[id]));
     }
 
     mpEventSignal->emit(spEvent(new ContactImportEvent(groupList)));
