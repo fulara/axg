@@ -8,7 +8,7 @@
 class ChatHistory
 {
 public:
-    ChatHistory(Wt::WContainerWidget *parent,Wt::WBoxLayout *pLayout);
+    ChatHistory(Wt::WContainerWidget *parent);
 
     void addSentMessage(std::string&);
     void addRecvMessage(unsigned int fromUin,std::string&);

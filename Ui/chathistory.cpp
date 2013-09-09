@@ -20,12 +20,12 @@ std::string formatTime(const boost::posix_time::ptime &time)
     return ss.str();
 }
 
-ChatHistory::ChatHistory(Wt::WContainerWidget *parent,Wt::WBoxLayout *layout)
+ChatHistory::ChatHistory(Wt::WContainerWidget *parent)
 {
     mpParent = parent;
 
     mpScrollArea = new Wt::WScrollArea();
-    layout->addWidget(mpScrollArea,1);
+    parent->addWidget(mpScrollArea);
     mpScrollArea->setWidget(mpTable = new Wt::WTable());
     mpScrollArea->setStyleClass("DialogWindowChatHistoryScroll");
     mpTable->setStyleClass("DialogWindowChatHistory");

@@ -3,6 +3,7 @@
 class GGWrapper;
 class LoginWindow;
 class AliveChecker;
+class DialogWindowHolder;
 class DialogWindow;
 class ContactList;
 class ContactWindow;
@@ -23,9 +24,9 @@ private:
 
     GGWrapper *mpWrapper;
     LoginWindow *mpLoginWindow;
-    AliveChecker *mpAliveChecker;
-    DialogWindow *mpDialogWindow;
+    DialogWindowHolder *mpDialogWindowHolder;
     ContactWindow *mpContactWindow;
+    AliveChecker *mpAliveChecker;
     Wt::JSignal<void> *mpWindowUnloadSignal;
     void initJSScripts();
     void initConnections();

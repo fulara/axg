@@ -17,7 +17,8 @@ SOURCES += main.cpp \
     Ui/historyentry.cpp \
     Ui/contactlist.cpp \
     Ui/contactentry.cpp \
-    Ui/contactwindow.cpp
+    Ui/contactwindow.cpp \
+    Ui/dialogwindowholder.cpp
 
 
 
@@ -46,7 +47,8 @@ HEADERS += \
     Ui/contactwindow.h \
     contactinfo.h \
     ContactGroup.h \
-    ContactImportEvent.h
+    ContactImportEvent.h \
+    Ui/dialogwindowholder.h
 
 
 

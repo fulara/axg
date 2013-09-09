@@ -8,52 +8,42 @@
 #include <Wt/WPushButton>
 #include <Wt/WLabel>
 #include <Wt/WVBoxLayout>
+#include <stdlib.h>
 #include "chathistory.h"
 #include "messageevent.h"
 #include "logger.h"
 
-DialogWindow::DialogWindow(Wt::WContainerWidget *parent)
+DialogWindow::DialogWindow(unsigned int targetUin, std::string targetName, Wt::WContainerWidget *parent)
     :
       Wt::WContainerWidget(parent)
 
 {
     setStyleClass("DialogWindow");
-    resize("400px","430px");
-    mpTargetInfo = new Wt::WLabel("Guc",this);
+    //Wt::WTable *table = new Wt::WTable();
+    mpTargetInfo = new Wt::WLabel(targetName,this);
     mpTargetInfo->setStyleClass("DialogWindowTargetInfo");
-    Wt::WVBoxLayout *layout = new Wt::WVBoxLayout(this);
-    layout->addWidget(mpTargetInfo);
-    mpChatHistory = new ChatHistory(this,layout);
-    mTargetUin = 3788407;
-    mTargetUin = 2577961;
-    //mTargetUin = 1067760;
+    addWidget(mpTargetInfo);
+    mpChatHistory = new ChatHistory(this);
+    mTargetUin = targetUin;
+    mTargetName = targetName;
     mpTextArea = new Wt::WTextArea();
-    layout->addWidget(mpTextArea);
+    addWidget(mpTextArea);
     mpTextArea->setStyleClass("DialogWindowTextArea");
 
     mpTextAreaEnterSignal = new Wt::JSignal<std::string>(this,"TextAreaEnterSignal");
     initOnKeyUpJSTextArea();
     mpTextAreaEnterSignal->connect(this,&DialogWindow::onTextAreaEnterPress);
 
-    mpTextArea->keyWentUp().connect(
-                [this](Wt::WKeyEvent &keyEvent)
-    {
-        if(keyEvent.key() == Wt::Key_Enter)
-        {
-            //onSendRequest();
-        }
-    });
 
 
     mpSendMessageButton = new Wt::WPushButton("Send Message To Da Guc");
-    layout->addWidget(mpSendMessageButton);
+    addWidget(mpSendMessageButton);
     mpSendMessageButton->clicked().connect(this,&DialogWindow::onSendButton);
 
 
     mpSendMessageSignal = new Wt::Signal<unsigned int, std::string>(this);
 
 
-    setLayout(layout);
 }
 void DialogWindow::initOnKeyUpJSTextArea()
 {
@@ -63,7 +53,7 @@ void DialogWindow::initOnKeyUpJSTextArea()
     ss << " var textArea = $(e.target);";
     ss << " var text =  textArea.val();";
     ss << " if(!ctrlPressed){";
-
+    ss << R"(text=text.replace(/^\n+|\s+$/g,'');)";
     ss << " textArea.val(\"\");";
     ss << " if(text.length > 0)" << mpTextAreaEnterSignal->createCall("text");
     ss << " return false;";
@@ -72,6 +62,10 @@ void DialogWindow::initOnKeyUpJSTextArea()
     ss << "}});";
     doJavaScript(ss.str());
 
+}
+void DialogWindow::reinitJS()
+{
+    initOnKeyUpJSTextArea();
 }
 
 DialogWindow::~DialogWindow()

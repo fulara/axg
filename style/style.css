@@ -21,7 +21,7 @@
 	background-color:#d0d4de;
 	display:block;
 	top: 15%;
-	position:relative;
+	position: absolute;
 	left: 2.5%;
 	width: 95%;
 	height: 80%;
@@ -37,16 +37,27 @@
 	height: 10%;
 	width: 100%;
 }
+.Highlighted
+{
+	background-color: #3399FF
+}
+.Highlighted span
+{
+	color:#fff
+}
 .MsgBox
 {
 	background-color:#fff;
 }
+.DialogWindowHolder
+{
+	position: absolute;
+	left: 40%;
+}
 .DialogWindow
 {
 	background-color:#b0c4de;
-	position: fixed;
-        left: 40%;
-	margin-left: -200px;
+	width:450px;
 }
 .DialogWindowTargetInfo
 {
@@ -66,12 +77,15 @@
 
 	margin-left: auto;
 	margin-right: auto;
-	background-color:#FFFFF2;
+	height:300px;
+	width:91%;
+	background-color:#f0f0f0;
 }
 .DialogWindowChatHistory
 {
 	width:100%;
 	background-color:#f0f0f0;
+	table-layout:fixed;
 }
 .ChatHistoryEntryMine
 {	

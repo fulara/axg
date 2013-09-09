@@ -1,7 +1,7 @@
 #ifndef CONTACTIMPORTEVENT_H
 #define CONTACTIMPORTEVENT_H
 
-#include <list>;
+#include <list>
 #include "ContactGroup.h"
 #include "event.h"
 class ContactImportEvent : public Event

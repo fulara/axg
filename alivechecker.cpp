@@ -33,7 +33,7 @@ AliveChecker::~AliveChecker()
 void AliveChecker::initJSScripts()
 {
    std::stringstream ss;
-   ss << "setInterval(function(){ " << mpActiveTimer->createCall() << "},2000)";
+   ss << "setInterval(function(){ " << mpActiveTimer->createCall() << "},4000)";
 
    dynamic_cast<Wt::WContainerWidget*>(parent())->doJavaScript(ss.str());
 

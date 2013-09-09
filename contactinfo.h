@@ -11,6 +11,21 @@ public:
     {
 
     }
+    std::string getDisplayName()
+    {
+        if(showName.empty())
+        {
+            if(nickName.empty())
+            {
+                return boost::lexical_cast<std::string>(uin);
+            }
+            else
+            {
+                return nickName;
+            }
+        }
+        return showName;
+    }
 
     unsigned int uin;
     std::string showName;

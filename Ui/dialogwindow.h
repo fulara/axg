@@ -12,13 +12,13 @@ class ContactImportEvent;
 class DialogWindow : public Wt::WContainerWidget
 {
 public:
-    DialogWindow(Wt::WContainerWidget *parent);
+    DialogWindow(unsigned int targetUin, std::string targetName, Wt::WContainerWidget *parent = 0);
     ~DialogWindow();
 
     Wt::Signal<unsigned int,std::string> &sendMessageRequest();
 
     void messageReceived(MessageEvent *ev);
-
+    void reinitJS();
 private:
     unsigned int mTargetUin;
     std::string mTargetName;

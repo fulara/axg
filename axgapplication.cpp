@@ -12,6 +12,7 @@
 #include <sstream>
 
 
+#include "Ui/dialogwindowholder.h"
 #include "axgapplication.h"
 #include "logger.h"
 #include "ggwrapper.h"
@@ -27,16 +28,18 @@
 using namespace Wt;
 
 
-#define LAYOUT_TEST
+#define LAYOUT_TEST1
 AxgApplication::AxgApplication(const Wt::WEnvironment& env)
   : WApplication(env),
     mpWrapper(new GGWrapper()),
     #ifndef LAYOUT_TEST
     mpLoginWindow(new LoginWindow(root())),
+    mpDialogWindowHolder(new DialogWindowHolder(root())),
     #else
-    mpDialogWindow(new DialogWindow(root())),
+    mpDialogWindowHolder(new DialogWindowHolder(root())),
     mpContactWindow(new ContactWindow(root())),
     #endif
+
     mpAliveChecker(new AliveChecker(root())),
 
     mpWindowUnloadSignal(new Wt::JSignal<void>(this,"WindowUnloadSignal"))
@@ -46,7 +49,9 @@ AxgApplication::AxgApplication(const Wt::WEnvironment& env)
     initConnections();
     initJSScripts();
 
-
+#ifdef LAYOUT_TEST
+    mpContactWindow->windowOpenRequest().connect(mpDialogWindowHolder,&DialogWindowHolder::openDialogWindowRequest);
+#endif
 
 
     this->useStyleSheet("style/style.css");
@@ -132,7 +137,7 @@ void AxgApplication::onContactImport(boost::shared_ptr<Event> event)
 void AxgApplication::onMessageRcv(boost::shared_ptr<Event> event)
 {
     MessageEvent *msgEvent = static_cast<MessageEvent*>(event.get());
-    this->mpDialogWindow->messageReceived(msgEvent);
+    this->mpDialogWindowHolder->messageReceived(msgEvent);
 }
 
 void AxgApplication::onLoginResult(boost::shared_ptr<Event> event)
@@ -141,9 +146,12 @@ void AxgApplication::onLoginResult(boost::shared_ptr<Event> event)
     if(loginResultEvent->wasLoginSuccesfull)
     {
         root()->removeWidget(mpLoginWindow);
-        mpDialogWindow = new DialogWindow(this->root());
-        mpDialogWindow->sendMessageRequest().connect(boost::bind(&GGWrapper::sendMessage,mpWrapper,_1,_2));
+        mpDialogWindowHolder = new DialogWindowHolder(this->root());
         mpContactWindow = new ContactWindow(root());
+        mpContactWindow->windowOpenRequest().connect(mpDialogWindowHolder,&DialogWindowHolder::openDialogWindowRequest);
+        mpDialogWindowHolder->newContactInfoRequest().connect(mpContactWindow,&ContactWindow::onNewContactInfoRequest);
+        mpDialogWindowHolder->sendMessageRequest().connect(mpWrapper,&GGWrapper::sendMessage);
+
     }
     else
         doJavaScript("alert(\"Failed Login attempt NYGGA\");");

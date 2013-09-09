@@ -13,4 +13,5 @@ namespace Wt
     class WText;
     class WScrollArea;
     class WBoxLayout;
+    class WMenuItem;
 }

@@ -217,7 +217,7 @@
 	     - false: JavaScript errors are caught and a simple error message
 	              is printed to indicate that something is terribly wrong
 	  -->
-	<debug>false</debug>
+	<debug>true</debug>
 
 	<!-- Log file
 
