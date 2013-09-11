@@ -60,17 +60,17 @@ void DialogWindow::initOnKeyUpJSTextArea()
     ss << "}";
     ss << "else textArea.val(text +'\\n');";
     ss << "}});";
-    doJavaScript(ss.str());
+    setJavaScriptMember("onEnterPress",ss.str());
 
-}
-void DialogWindow::reinitJS()
-{
-    initOnKeyUpJSTextArea();
 }
 
 DialogWindow::~DialogWindow()
 {
     delete mpChatHistory;
+}
+void DialogWindow::focusOnTextArea()
+{
+    mpTextArea->setFocus();
 }
 
 void DialogWindow::onSendButton()

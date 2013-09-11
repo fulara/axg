@@ -114,7 +114,7 @@ void AxgApplication::onEvent(boost::shared_ptr<Event> event)
 void AxgApplication::onEventUIThread(boost::shared_ptr<Event> event)
 {
     //auto lock = UpdateLock(this);
-    switch(event->type)
+    switch(event->getType())
     {
         case Event::LoginResult:
             onLoginResult(event);
@@ -149,6 +149,7 @@ void AxgApplication::onLoginResult(boost::shared_ptr<Event> event)
         mpDialogWindowHolder = new DialogWindowHolder(this->root());
         mpContactWindow = new ContactWindow(root());
         mpContactWindow->windowOpenRequest().connect(mpDialogWindowHolder,&DialogWindowHolder::openDialogWindowRequest);
+        mpContactWindow->windowOpenRequestForceActivate().connect(mpDialogWindowHolder,&DialogWindowHolder::openDialogWindowAndActivateRequest);
         mpDialogWindowHolder->newContactInfoRequest().connect(mpContactWindow,&ContactWindow::onNewContactInfoRequest);
         mpDialogWindowHolder->sendMessageRequest().connect(mpWrapper,&GGWrapper::sendMessage);
 

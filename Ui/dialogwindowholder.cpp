@@ -47,8 +47,7 @@ void DialogWindowHolder::onTabClosed(int index)
 void DialogWindowHolder::activeChanged(int index)
 {
     Logger::log("Index changed..");
-    DialogWindow *window = static_cast<DialogWindow*>(mpTabWidget->widget(index));
-    window->reinitJS();
+    //DialogWindow *window = static_cast<DialogWindow*>(mpTabWidget->widget(index));
 }
 bool DialogWindowHolder::isDialogWindowOpen(unsigned int targetUin)
 {
@@ -82,7 +81,7 @@ Wt::Signal<unsigned int> &DialogWindowHolder::newContactInfoRequest()
     return *mpNewContactInfoRequest;
 }
 
-void DialogWindowHolder::openDialogWindowRequest(ContactInfo contactinfo)
+DialogWindow* DialogWindowHolder::openDialogWindow(ContactInfo contactinfo)
 {
     auto it =mDialogWindows.begin();
     if((it = mDialogWindows.find(contactinfo.uin)) != mDialogWindows.end())
@@ -93,20 +92,37 @@ void DialogWindowHolder::openDialogWindowRequest(ContactInfo contactinfo)
         {
             auto menuItem = mpTabWidget->addTab(dialogWindow,contactinfo.getDisplayName(),Wt::WTabWidget::PreLoading);
             menuItem->setCloseable(true);
-            dialogWindow->reinitJS();
-            return;
+            return dialogWindow;
         }
         mpTabWidget->setCurrentIndex(index);
-        return;
+        return dialogWindow;
     }
-    DialogWindow* newDialogWindow = new DialogWindow(contactinfo.uin,contactinfo.getDisplayName());
-    newDialogWindow->sendMessageRequest().connect(this,&DialogWindowHolder::sendMessageForward);
-    mDialogWindows.insert(std::make_pair(contactinfo.uin,newDialogWindow));
-    auto menuItem = mpTabWidget->addTab(newDialogWindow,contactinfo.getDisplayName(),Wt::WTabWidget::PreLoading);
-    menuItem->setCloseable(true);
-    newDialogWindow->reinitJS();
+    return createNewDialogWindow(contactinfo);
+
 
 }
+DialogWindow *DialogWindowHolder::createNewDialogWindow(ContactInfo contactInfo)
+{
+    DialogWindow* newDialogWindow = new DialogWindow(contactInfo.uin,contactInfo.getDisplayName());
+    newDialogWindow->sendMessageRequest().connect(this,&DialogWindowHolder::sendMessageForward);
+    mDialogWindows.insert(std::make_pair(contactInfo.uin,newDialogWindow));
+    auto menuItem = mpTabWidget->addTab(newDialogWindow,contactInfo.getDisplayName(),Wt::WTabWidget::PreLoading);
+    menuItem->setCloseable(true);
+
+    return newDialogWindow;
+}
+void DialogWindowHolder::openDialogWindowRequest(ContactInfo contactinfo)
+{
+    openDialogWindow(contactinfo);
+}
+
+void DialogWindowHolder::openDialogWindowAndActivateRequest(ContactInfo contactInfo)
+{
+    DialogWindow *dialogWindow = openDialogWindow(contactInfo);
+    dialogWindow->focusOnTextArea();
+    mpTabWidget->setCurrentWidget(dialogWindow);
+}
+
 Wt::Signal<unsigned int, std::string> &DialogWindowHolder::sendMessageRequest()
 {
     return *mpSendMessageSignal;

@@ -12,7 +12,9 @@ public:
     DialogWindowHolder(Wt::WContainerWidget *parent = 0);
     ~DialogWindowHolder();
 
+    DialogWindow* openDialogWindow(ContactInfo contactinfo);
     void openDialogWindowRequest(ContactInfo contactinfo);
+    void openDialogWindowAndActivateRequest(ContactInfo);
     void messageReceived(MessageEvent *msg);
     Wt::Signal<unsigned int> &newContactInfoRequest();
     Wt::Signal<unsigned int, std::string> &sendMessageRequest();
@@ -23,6 +25,7 @@ private:
     Wt::Signal<unsigned int, std::string> *mpSendMessageSignal;
     std::map<unsigned int, DialogWindow*> mDialogWindows;
 
+    DialogWindow *createNewDialogWindow(ContactInfo contactInfo);
     void activeChanged(int index);
     void onTabClosed(int index);
     bool isDialogWindowOpen(unsigned int uin);

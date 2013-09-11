@@ -6,13 +6,17 @@ class LoginResultEvent : public Event
 {
 public:
     LoginResultEvent(bool state) :
-        Event(EventType::LoginResult,0),
         wasLoginSuccesfull(state)
     {
 
     }
 
     bool wasLoginSuccesfull;
+
+    EventType getType()
+    {
+        return LoginResult;
+    }
 };
 
 #endif // LOGINRESULTEVENT_H

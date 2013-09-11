@@ -15,6 +15,7 @@ public:
     ContactList(Wt::WContainerWidget *parent);
 
     Wt::Signal<ContactInfo> &openContactRequest();
+    Wt::Signal<ContactInfo> &openContactForceOpenRequest();
     void initContacts(const std::list<ContactGroup> & contactGroups);
     void handleNewContactInfoRequest(unsigned int uin);
 
@@ -22,9 +23,11 @@ private:
 
     ContactEntry *mpLastEntryClicked;
     Wt::Signal<ContactInfo> *mpOpenContactSignal;
+    Wt::Signal<ContactInfo> *mpOpenContactSignalForceOpen;
     std::list<ContactInfo> mContacts;
 
     bool findContactAndEmitInfo(unsigned int targetUin);
+    void findContactAndEmitForceOpenInfo(unsigned int targetUin);
     void addContact(unsigned int uin, std::string showName);
     void onEntryClicked(ContactEntry *invoker);
     void createAnonymousContact(unsigned int uin);

@@ -16,7 +16,6 @@ ContactWindow::ContactWindow(Wt::WContainerWidget *parent)
 
 void ContactWindow::contactsReceived(ContactImportEvent *ev)
 {
-    auto &groups = ev->contactGroups;
     mpContactList->initContacts(ev->contactGroups);
 
 }
@@ -24,6 +23,10 @@ void ContactWindow::contactsReceived(ContactImportEvent *ev)
 Wt::Signal<ContactInfo> &ContactWindow::windowOpenRequest()
 {
     return mpContactList->openContactRequest();
+}
+Wt::Signal<ContactInfo> &ContactWindow::windowOpenRequestForceActivate()
+{
+    return mpContactList->openContactForceOpenRequest();
 }
 void ContactWindow::onNewContactInfoRequest(const unsigned int uin)
 {

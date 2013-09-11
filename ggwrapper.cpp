@@ -69,7 +69,7 @@ gg_event* GGWrapper::pollGGEvent()
     if ((mpSession->check & GG_CHECK_WRITE))
             FD_SET(mpSession->fd, &wd);
 
-    int ret = select(mpSession->fd + 1,&rd,&wd,NULL,&tv);
+    select(mpSession->fd + 1,&rd,&wd,NULL,&tv);
 
     if(FD_ISSET(mpSession->fd, &rd) || FD_ISSET(mpSession->fd, &wd))
     {
@@ -154,7 +154,7 @@ void GGWrapper::onRecvOwnInfo(gg_event_user_data &data)
         std::map<std::string,std::string> attributes;
         gg_event_user_data_user &userData = data.users[userIndex];
         //Logger::log(std::string("info from: ") + boost::lexical_cast<std::string>(userData.uin));
-        for(int attriIndex = 0 ; attriIndex < userData.attr_count;  ++attriIndex)
+        for(unsigned int attriIndex = 0 ; attriIndex < userData.attr_count;  ++attriIndex)
         {
             gg_event_user_data_attr &attri =  userData.attrs[attriIndex];
             std::string attriKey(attri.key);
@@ -169,7 +169,7 @@ void GGWrapper::onRecvContacts(gg_event_userlist100_reply& data)
     convertSBMap.insert(std::make_pair("true",1));
     convertSBMap.insert(std::make_pair("false",0));
     pugi::xml_document doc;
-    auto parsed = doc.load(data.reply);
+    doc.load(data.reply);
     auto contactBookNode  = doc.child("ContactBook");
     auto groups = contactBookNode.child("Groups");
     auto contacts = contactBookNode.child("Contacts");

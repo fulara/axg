@@ -16,9 +16,8 @@ public:
     ~DialogWindow();
 
     Wt::Signal<unsigned int,std::string> &sendMessageRequest();
-
+    void focusOnTextArea();
     void messageReceived(MessageEvent *ev);
-    void reinitJS();
 private:
     unsigned int mTargetUin;
     std::string mTargetName;

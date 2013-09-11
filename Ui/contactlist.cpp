@@ -13,25 +13,11 @@ ContactList::ContactList(Wt::WContainerWidget *parent)
 {
     setStyleClass("ContactList");
     mpOpenContactSignal = new Wt::Signal<ContactInfo>(this);
-
+    mpOpenContactSignalForceOpen = new Wt::Signal<ContactInfo>(this);
 
     addContact(3788407,"Guc");
     mContacts.push_back(ContactInfo(3788407,"Guc","",true,true,true));
     //addContact(2577966,"Tomek");
-    /*addWidget(new ContactEntry(2577961,"Olek"));
-    addWidget(new ContactEntry(2577961,"Olek"));
-    addWidget(new ContactEntry(2577961,"Olek"));
-    addWidget(new ContactEntry(2577961,"Olek"));
-    addWidget(new ContactEntry(2577961,"Olek"));
-    addWidget(new ContactEntry(2577961,"Olek"));
-    addWidget(new ContactEntry(2577961,"Olek"));
-    addWidget(new ContactEntry(2577961,"Olek"));
-    addWidget(new ContactEntry(2577961,"Olek"));
-    addWidget(new ContactEntry(2577961,"Olek"));
-    addWidget(new ContactEntry(2577961,"Olek"));
-    addWidget(new ContactEntry(2577961,"Olek"));
-    addWidget(new ContactEntry(2577961,"Olek"));
-    addWidget(new ContactEntry(2577961,"Olek"));*/
 
 
 }
@@ -63,6 +49,10 @@ void ContactList::initContacts(const std::list<ContactGroup> &contactGroups)
 
 
 }
+Wt::Signal<ContactInfo> &ContactList::openContactForceOpenRequest()
+{
+    return *mpOpenContactSignalForceOpen;
+}
 
 void ContactList::handleNewContactInfoRequest(unsigned int uin)
 {
@@ -93,15 +83,24 @@ bool ContactList::findContactAndEmitInfo(unsigned int targetUin)
     }
     return false;
 }
+void ContactList::findContactAndEmitForceOpenInfo(unsigned int targetUin)
+{
+    BOOST_FOREACH(ContactInfo& contactInfo,mContacts)
+    {
+        if(contactInfo.uin == targetUin)
+        {
+            mpOpenContactSignalForceOpen->emit(contactInfo);
+            return;
+        }
+    }
+    assert(false);
+}
 
 void ContactList::onEntryClicked(ContactEntry *invoker)
 {
     if(mpLastEntryClicked == invoker)
     {
-        if(findContactAndEmitInfo(invoker->getUin()))
-        {
-            //..
-        }
+        findContactAndEmitForceOpenInfo(invoker->getUin());
         //static int fak = 0;
        // mpOpenContactSignal->emit(ContactInfo(2577961+ fak++,"Olek","Olek",false,false,false));
         mpLastEntryClicked->removeStyleClass("Highlighted");

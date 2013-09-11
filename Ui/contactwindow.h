@@ -14,6 +14,7 @@ public:
     void contactsReceived(ContactImportEvent *ev);
     void onNewContactInfoRequest(const unsigned int uin);
     Wt::Signal<ContactInfo> &windowOpenRequest();
+    Wt::Signal<ContactInfo> &windowOpenRequestForceActivate();
 private:
     ContactList *mpContactList;
 

@@ -6,7 +6,6 @@ class MessageEvent : public Event
 {
 public:
     MessageEvent(unsigned int fromUin, std::string& content) :
-        Event(EventType::MessageRcv,0),
         fromUin(fromUin),
         content(content)
     {
@@ -15,6 +14,10 @@ public:
 
     unsigned int fromUin;
     std::string content;
+    EventType getType()
+    {
+        return MessageRcv;
+    }
 };
 
 #endif // MESSAGEEVENT_H

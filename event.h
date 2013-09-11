@@ -5,15 +5,11 @@ class Event
 {
 public:
     enum EventType { LoginResult,MessageRcv,ContactImport};
-    //fake arg because of amiguity ..
-    Event(EventType type,bool fakeArg) : type(type)
-    {
-
-    }
+    Event(){}
     Event(const EventType&) = delete;
     Event& operator=(const EventType&) = delete;
 
-    EventType type;
+    virtual EventType getType() = 0;
 };
 
 #endif // EVENT_H
