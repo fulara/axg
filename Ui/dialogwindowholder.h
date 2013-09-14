@@ -18,11 +18,13 @@ public:
     void messageReceived(MessageEvent *msg);
     Wt::Signal<unsigned int> &newContactInfoRequest();
     Wt::Signal<unsigned int, std::string> &sendMessageRequest();
+    Wt::Signal<unsigned int, int> &sendTypingNotificationRequest();
 
 private:
     Wt::WTabWidget *mpTabWidget;
     Wt::Signal<unsigned int> *mpNewContactInfoRequest;
     Wt::Signal<unsigned int, std::string> *mpSendMessageSignal;
+    Wt::Signal<unsigned int, int> *mpSendTypingNotificationSignal;
     std::map<unsigned int, DialogWindow*> mDialogWindows;
 
     DialogWindow *createNewDialogWindow(ContactInfo contactInfo);
@@ -31,6 +33,7 @@ private:
     bool isDialogWindowOpen(unsigned int uin);
     DialogWindow* getDialogWindowById(unsigned int targetUin);
     void sendMessageForward(unsigned int targetUin,const std::string& msg);
+    void forwardNotificationRequest(unsigned int targetUin, int length);
 
 };
 

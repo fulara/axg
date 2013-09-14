@@ -11,6 +11,8 @@ public:
     LoginWindow(Wt::WContainerWidget *parent = 0);
     ~LoginWindow();
     Wt::Signal<unsigned int,std::string> &loginSignal();
+
+    void reset();
 private:
     Wt::WLineEdit *mpUinEdit;
     Wt::WLineEdit *mpPassEdit;

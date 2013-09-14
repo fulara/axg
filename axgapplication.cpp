@@ -78,7 +78,7 @@ void AxgApplication::initConnections()
     mpWindowUnloadSignal->connect(this,&AxgApplication::onWindowUnload);
     mpWrapper->eventSignal().connect(this,&AxgApplication::onEvent);
     #ifndef LAYOUT_TEST
-    mpLoginWindow->loginSignal().connect(boost::bind(&GGWrapper::connect,mpWrapper,_1,_2));
+    mpLoginWindow->loginSignal().connect(mpWrapper,&GGWrapper::connect);
     #endif
     mpAliveChecker->died().connect(this,&AxgApplication::onQuitRequested);
 
@@ -91,6 +91,11 @@ void AxgApplication::onWindowUnload()
     //quit();
 
 }
+void AxgApplication::finalize()
+{
+    WApplication::finalize();
+}
+
 void AxgApplication::onQuitRequested()
 {
     Logger::log("Quit Requested.. pushing onto UI");
@@ -146,14 +151,22 @@ void AxgApplication::onLoginResult(boost::shared_ptr<Event> event)
     if(loginResultEvent->wasLoginSuccesfull)
     {
         root()->removeWidget(mpLoginWindow);
+        delete mpLoginWindow;
         mpDialogWindowHolder = new DialogWindowHolder(this->root());
         mpContactWindow = new ContactWindow(root());
         mpContactWindow->windowOpenRequest().connect(mpDialogWindowHolder,&DialogWindowHolder::openDialogWindowRequest);
         mpContactWindow->windowOpenRequestForceActivate().connect(mpDialogWindowHolder,&DialogWindowHolder::openDialogWindowAndActivateRequest);
         mpDialogWindowHolder->newContactInfoRequest().connect(mpContactWindow,&ContactWindow::onNewContactInfoRequest);
         mpDialogWindowHolder->sendMessageRequest().connect(mpWrapper,&GGWrapper::sendMessage);
-
+        mpDialogWindowHolder->sendTypingNotificationRequest().connect(mpWrapper,&GGWrapper::sendTypingNotification);
     }
     else
-        doJavaScript("alert(\"Failed Login attempt NYGGA\");");
+    {
+        mpLoginWindow->reset();
+        //delete mpWrapper;
+        //mpWrapper = new GGWrapper();
+        //mpWrapper->eventSignal().connect(this,&AxgApplication::onEvent);
+        //mpLoginWindow->loginSignal().connect(mpWrapper,&GGWrapper::connect);
+        doJavaScript("alert('Failed to login NYGGA!');");
+    }
 }

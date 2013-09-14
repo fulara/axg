@@ -31,7 +31,7 @@ DialogWindow::DialogWindow(unsigned int targetUin, std::string targetName, Wt::W
     mpTextArea->setStyleClass("DialogWindowTextArea");
 
     mpTextAreaEnterSignal = new Wt::JSignal<std::string>(this,"TextAreaEnterSignal");
-    initOnKeyUpJSTextArea();
+
     mpTextAreaEnterSignal->connect(this,&DialogWindow::onTextAreaEnterPress);
 
 
@@ -42,16 +42,18 @@ DialogWindow::DialogWindow(unsigned int targetUin, std::string targetName, Wt::W
 
 
     mpSendMessageSignal = new Wt::Signal<unsigned int, std::string>(this);
-
-
+    mpSendTypingNotificationSignal = new Wt::Signal<unsigned int, int>(this);
+    mpTextLengthUpdateSignal = new Wt::JSignal<int>(this,"TextLengthUpdateSignal");
+    mpTextLengthUpdateSignal->connect(this,&DialogWindow::onTextLengthUpdate);
+    initOnKeyUpJSTextArea();
 }
 void DialogWindow::initOnKeyUpJSTextArea()
 {
     std::stringstream ss;
     ss << "$(\"#" << mpTextArea->id() << "\").keydown(function(e) {";
-    ss << "if( e.which == 13 )    {";
     ss << " var textArea = $(e.target);";
     ss << " var text =  textArea.val();";
+    ss << "if( e.which == 13 )    {";
     ss << " if(!ctrlPressed){";
     ss << R"(text=text.replace(/^\n+|\s+$/g,'');)";
     ss << " textArea.val(\"\");";
@@ -59,9 +61,20 @@ void DialogWindow::initOnKeyUpJSTextArea()
     ss << " return false;";
     ss << "}";
     ss << "else textArea.val(text +'\\n');";
+    ss << "}";
+    ss << "else {";
+    ss << "if( e.which == 9){ e.preventDefault();textArea.val(text + '\\t');} /*check if ctrl pressed .. */";
+    ss << "";
     ss << "}});";
+    ss << "$(\"#" << mpTextArea->id() << "\").keyup(function(){";
+    ss << mpTextLengthUpdateSignal->createCall("$(this).val().length");
+    ss << "});";
     setJavaScriptMember("onEnterPress",ss.str());
 
+}
+void DialogWindow::onTextLengthUpdate(int length)
+{
+    mpSendTypingNotificationSignal->emit(mTargetUin,length);
 }
 
 DialogWindow::~DialogWindow()
@@ -96,7 +109,11 @@ void DialogWindow::messageReceived(MessageEvent *ev)
 }
 
 
- Wt::Signal<unsigned int,std::string> &DialogWindow::sendMessageRequest()
+Wt::Signal<unsigned int,std::string> &DialogWindow::sendMessageRequest()
 {
     return *mpSendMessageSignal;
+}
+Wt::Signal<unsigned int, int> &DialogWindow::sendTypingNotificationRequest()
+{
+    return *mpSendTypingNotificationSignal;
 }

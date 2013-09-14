@@ -6,6 +6,7 @@
 #include <Wt/WLineEdit>
 #include <Wt/WPushButton>
 #include <Wt/WText>
+#include <Wt/WEnvironment>
 #include "axgapplication.h"
 
 using namespace Wt;

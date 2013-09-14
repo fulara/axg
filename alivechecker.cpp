@@ -55,7 +55,7 @@ void AliveChecker::onTimeout()
     mMutex.lock();
     boost::posix_time::time_duration timeSpan(timeNow - mLastJSUpdate);
     mMutex.unlock();
-    if (timeSpan.seconds() > 10)
+    if (timeSpan.seconds() > mTimeOut)
     {
         //we are dead;
         mpDiedSignal->emit();

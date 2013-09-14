@@ -32,6 +32,11 @@ LoginWindow::~LoginWindow()
     delete mpLoginSignal;
 }
 
+void LoginWindow::reset()
+{
+    mpPassEdit->setText("");
+    mpLoginButton->setEnabled(true);
+}
 
 void LoginWindow::onLoginButton()
 {

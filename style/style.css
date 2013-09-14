@@ -1,3 +1,8 @@
+pre
+{
+	margin: 0 0;
+	font-family: helvetica, arial, sans-serif;
+}
 .LoginWindow
 {
 	border-style:solid;
@@ -13,6 +18,8 @@
 }
 .ContactWindow
 {
+	width:200px;
+	height:500px;
         background-color:#b0cfde;
 	position:relative;
 }
@@ -25,8 +32,8 @@
 	left: 2.5%;
 	width: 95%;
 	height: 80%;
-	overflow: auto;
-
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 .ContactEntry
 {
@@ -36,6 +43,7 @@
 	margin-right: auto;
 	height: 10%;
 	width: 100%;
+	word-wrap: break-word;
 }
 .Highlighted
 {
@@ -96,4 +104,15 @@
 {
 	background-color:#A6F9ED;
 	word-wrap: break-word;
+}
+.ChatHistoryNick
+{
+	font-size: small;
+	color: #888888;
+}
+.ChatHistoryTimeStamp
+{
+	float: right;
+	font-size: small;
+	color: #888888;
 }

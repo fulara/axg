@@ -20,6 +20,8 @@ class AxgApplication : public Wt::WApplication
 public:
     AxgApplication(const Wt::WEnvironment& env);
     ~AxgApplication();
+
+    void finalize();
 private:
 
     GGWrapper *mpWrapper;

@@ -14,7 +14,8 @@ DialogWindowHolder::DialogWindowHolder(Wt::WContainerWidget *parent)
     : Wt::WContainerWidget(parent),
       mpTabWidget(new Wt::WTabWidget(this)),
       mpNewContactInfoRequest(new Wt::Signal<unsigned int>(this)),
-      mpSendMessageSignal(new Wt::Signal<unsigned int, std::string>(this))
+      mpSendMessageSignal(new Wt::Signal<unsigned int, std::string>(this)),
+      mpSendTypingNotificationSignal(new Wt::Signal<unsigned int, int>(this))
 {
     setStyleClass("DialogWindowHolder");
     mpTabWidget->tabClosed().connect(this,&DialogWindowHolder::onTabClosed);
@@ -105,12 +106,18 @@ DialogWindow *DialogWindowHolder::createNewDialogWindow(ContactInfo contactInfo)
 {
     DialogWindow* newDialogWindow = new DialogWindow(contactInfo.uin,contactInfo.getDisplayName());
     newDialogWindow->sendMessageRequest().connect(this,&DialogWindowHolder::sendMessageForward);
+    newDialogWindow->sendTypingNotificationRequest().connect(this, &DialogWindowHolder::forwardNotificationRequest);
     mDialogWindows.insert(std::make_pair(contactInfo.uin,newDialogWindow));
     auto menuItem = mpTabWidget->addTab(newDialogWindow,contactInfo.getDisplayName(),Wt::WTabWidget::PreLoading);
     menuItem->setCloseable(true);
 
     return newDialogWindow;
 }
+void DialogWindowHolder::forwardNotificationRequest(unsigned int targetUin, int length)
+{
+    mpSendTypingNotificationSignal->emit(targetUin,length);
+}
+
 void DialogWindowHolder::openDialogWindowRequest(ContactInfo contactinfo)
 {
     openDialogWindow(contactinfo);
@@ -126,6 +133,10 @@ void DialogWindowHolder::openDialogWindowAndActivateRequest(ContactInfo contactI
 Wt::Signal<unsigned int, std::string> &DialogWindowHolder::sendMessageRequest()
 {
     return *mpSendMessageSignal;
+}
+Wt::Signal<unsigned int, int> &DialogWindowHolder::sendTypingNotificationRequest()
+{
+    return *mpSendTypingNotificationSignal;
 }
 
 void DialogWindowHolder::sendMessageForward(unsigned int targetUin, const std::string &msg)

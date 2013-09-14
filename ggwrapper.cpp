@@ -23,6 +23,7 @@
 #include "contactinfo.h"
 #include "ContactGroup.h"
 #include "ggmessageevent.h"
+#include "ggTypingEvent.h"
 
 #include "ContactImportEvent.h"
 typedef boost::shared_ptr<Event> spEvent;
@@ -45,6 +46,7 @@ GGWrapper::~GGWrapper()
 
     if(mpSession)
     {
+        gg_logoff(mpSession);
         gg_free_session(mpSession);
     }
 
@@ -110,6 +112,10 @@ void GGWrapper::enterLoop()
 void GGWrapper::sendMessage(unsigned int targetUin, const std::string &content)
 {
     addToEventLoop(ggEvent(ggEvent::MessageEvent,ggMessageEvent(targetUin,content)));
+}
+void GGWrapper::sendTypingNotification(unsigned int targetUin, int length)
+{
+    addToEventLoop(ggEvent(ggEvent::TypingNotificationEvent,ggTypingEvent(targetUin,length)));
 }
 
 void GGWrapper::sendPing()
@@ -178,7 +184,10 @@ void GGWrapper::onRecvContacts(gg_event_userlist100_reply& data)
     for(auto it = contacts.begin(); it != contacts.end(); ++it)
     {
         std::string guid = it->child("Guid").child_value(); // dunno what it is
-        unsigned int uin = boost::lexical_cast<unsigned int>(it->child("GGNumber").child_value());
+        auto ggNode = it->child("GGNumber");
+        if(strlen(ggNode.child_value()) == 0)
+            continue;
+        unsigned int uin = boost::lexical_cast<unsigned int>(ggNode.child_value());
         std::string showName = it->child("ShowName").child_value();
         std::string nickName = it->child("NickName").child_value();
         bool isBuddy = convertSBMap[it->child("FlagBuddy").child_value()];
@@ -222,6 +231,7 @@ void GGWrapper::processGGEvent(gg_event &ev)
             Logger::log("Received GG_EVENT_STATUS\n");
             break;
         case GG_EVENT_ACK:			/**< Potwierdzenie doreczenia wiadomosci */
+
             Logger::log("Received GG_EVENT_ACK\n");
             break;
         case GG_EVENT_PONG:			/**< \brief Utrzymanie polaczenia. Obecnie serwer nie wysyla juz do klienta ramek utrzymania polaczenia, polega wylacznie na wysylaniu ramek przez klienta. */
@@ -229,10 +239,16 @@ void GGWrapper::processGGEvent(gg_event &ev)
             break;
         case GG_EVENT_CONN_FAILED:		/**< \brief Nie udalo sie polaczyc */
             Logger::log("Received GG_EVENT_CONN_FAILED\n");
+            eventSignal().emit(spEvent(new LoginResultEvent(false)));
+            mpSession = 0;
+            throw std::exception();
+            //gg_free_session(mpSession);
+
             break;
         case GG_EVENT_CONN_SUCCESS:		/**< \brief Polaczono z serwerem. Pierwsza rzecza, jaka nalezy zrobic jest wyslanie listy kontaktów. */
             Logger::log("Received GG_EVENT_CONN_SUCCESS\n");
-            if ( -1 != gg_notify(mpSession,NULL,0))
+            break;
+            /*if ( -1 != gg_notify(mpSession,NULL,0))
             {
                 eventSignal().emit(spEvent(new LoginResultEvent(true)));
 
@@ -241,7 +257,7 @@ void GGWrapper::processGGEvent(gg_event &ev)
                 {
                     Logger::log("Succesfully requested userlist..?");
                 }
-            }
+            }*/
 
             break;
         case GG_EVENT_DISCONNECT:		/**< \brief Serwer zrywa polaczenie. Zdarza sie, gdy równolegle do serwera podlaczy sie druga sesja i trzeba zerwac polaczenie z pierwsza. */
@@ -335,6 +351,7 @@ void GGWrapper::processGGEvent(gg_event &ev)
             break;
         case GG_EVENT_TYPING_NOTIFICATION:	/**< Powiadomienie o pisaniu */
             Logger::log("Received GG_EVENT_TYPING_NOTIFICATION\n");
+
             break;
         case GG_EVENT_USER_DATA:		/**< Informacja o kontaktach */
             onRecvOwnInfo(reinterpret_cast<gg_event_user_data&>(ev.event));
@@ -373,6 +390,12 @@ void GGWrapper::processEvent(ggEvent &event)
             processMessageEvent(messageEvent);
             break;
         }
+        case ggEvent::TypingNotificationEvent:
+        {
+            ggTypingEvent &typingEvent = boost::any_cast<ggTypingEvent&>(event.content);
+            processTypingEvent(typingEvent);
+            break;
+        }
     }
 
     //do switch case and process each item accordingly.
@@ -383,24 +406,36 @@ void GGWrapper::processLoginEvent(ggLoginEvent &event)
     memset(&p,0,sizeof(gg_login_params));
     p.uin = event.uin;
     p.password = const_cast<char *>(event.pass.c_str());
-    p.async = 1;
-    if((mpSession = gg_login(&p)))// && gg_notify(mpSession,NULL,0) != -1)
+    p.async = 0;
+    if((mpSession = gg_login(&p)) && gg_notify(mpSession,NULL,0) != -1)
     {
-        //eventSignal().emit(spEvent(new LoginResultEvent(true)));
+        eventSignal().emit(spEvent(new LoginResultEvent(true)));
+        if ( -1 != gg_userlist100_request(mpSession,GG_USERLIST100_GET,0,GG_USERLIST100_FORMAT_TYPE_GG100,0))
+        {
+            Logger::log("Succesfully requested userlist..?");
+        }
+
     }
-    //else
-        //eventSignal().emit(spEvent(new LoginResultEvent(false)));
+    else
+    {
+        eventSignal().emit(spEvent(new LoginResultEvent(false)));
+        gg_free_session(mpSession);
+        mpSession = 0;
+    }
 }
 void GGWrapper::processMessageEvent(ggMessageEvent &event)
 {
-    gg_send_message(mpSession,GG_CLASS_MSG,event.uin,(unsigned char*)event.msg.c_str());
+    gg_send_message(mpSession,GG_CLASS_CHAT,event.uin,(unsigned char*)event.msg.c_str());
 }
 
 void GGWrapper::addToEventLoop(const ggEvent &event)
 {
     mpQueue->push_back(event);
 }
-
+void GGWrapper::processTypingEvent(ggTypingEvent& event)
+{
+    gg_typing_notification(mpSession,event.recipientUin,event.length);
+}
 
 Wt::Signal<spEvent> &GGWrapper::eventSignal()
 {

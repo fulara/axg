@@ -14,4 +14,5 @@ namespace Wt
     class WScrollArea;
     class WBoxLayout;
     class WMenuItem;
+    class WStackedWidget;
 }

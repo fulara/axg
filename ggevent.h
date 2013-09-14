@@ -5,7 +5,7 @@
 
 struct ggEvent
 {
-    enum ggEventType { LoginEvent, MessageEvent };
+    enum ggEventType { LoginEvent, MessageEvent, TypingNotificationEvent };
 public:
     ggEvent(ggEventType eventType, boost::any content)
         : eventType(eventType),

@@ -8,11 +8,17 @@
 class HistoryEntry : public Wt::WContainerWidget
 {
 public:
-    HistoryEntry(const std::string date,const std::string msg, bool myMessage,Wt::WContainerWidget *parent);
+    static HistoryEntry *createMyEntryDateNickname(const std::string date, const std::string nickname, const std::string &msg, Wt::WContainerWidget *parent);
+    static HistoryEntry *createMyEntryDate(const std::string date, const std::string &msg, Wt::WContainerWidget *parent);
+    static HistoryEntry *createMyEntry(const std::string &msg,Wt::WContainerWidget *parent);
 
+    static HistoryEntry *createTargetEntryDateNickname(const std::string date, const std::string nickname, const std::string &msg, Wt::WContainerWidget *parent);
+    static HistoryEntry *createTargetEntryDate(const std::string date, const std::string &msg, Wt::WContainerWidget *parent);
+    static HistoryEntry *createTargetEntry(const std::string &msg,Wt::WContainerWidget *parent);
 private:
-    Wt::WText *mpDateText;
-    Wt::WText *mpMessage;
+    HistoryEntry(Wt::WContainerWidget *parent);
+
+
 
 };
 

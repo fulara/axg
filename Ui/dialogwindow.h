@@ -16,6 +16,7 @@ public:
     ~DialogWindow();
 
     Wt::Signal<unsigned int,std::string> &sendMessageRequest();
+    Wt::Signal<unsigned int, int> &sendTypingNotificationRequest();
     void focusOnTextArea();
     void messageReceived(MessageEvent *ev);
 private:
@@ -28,9 +29,12 @@ private:
     Wt::WPushButton *mpSendMessageButton;
 
     Wt::Signal<unsigned int, std::string> *mpSendMessageSignal;
+    Wt::Signal<unsigned int, int> *mpSendTypingNotificationSignal;
     Wt::JSignal<std::string> *mpTextAreaEnterSignal;
+    Wt::JSignal<int> *mpTextLengthUpdateSignal;
 
     void initOnKeyUpJSTextArea();
+    void onTextLengthUpdate(int length);
     void onTextAreaEnterPress(std::string content);
     void onSendButton();
 

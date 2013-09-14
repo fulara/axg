@@ -15,9 +15,14 @@ public:
     void onNewContactInfoRequest(const unsigned int uin);
     Wt::Signal<ContactInfo> &windowOpenRequest();
     Wt::Signal<ContactInfo> &windowOpenRequestForceActivate();
+    void createContactFillEdit();
+
 private:
     ContactList *mpContactList;
+    Wt::WLineEdit *mpContactFilterEdit;
 
+    void cancelFiltering();
+    void onContactFilterChanged(Wt::WKeyEvent keyEvent);
 
 };
 

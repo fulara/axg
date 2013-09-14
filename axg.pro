@@ -18,7 +18,9 @@ SOURCES += main.cpp \
     Ui/contactlist.cpp \
     Ui/contactentry.cpp \
     Ui/contactwindow.cpp \
-    Ui/dialogwindowholder.cpp
+    Ui/dialogwindowholder.cpp \
+    WtUtilFuns.cpp \
+    historymanager.cpp
 
 
 
@@ -48,7 +50,10 @@ HEADERS += \
     contactinfo.h \
     ContactGroup.h \
     ContactImportEvent.h \
-    Ui/dialogwindowholder.h
+    Ui/dialogwindowholder.h \
+    WtUtilFuns.h \
+    historymanager.h \
+    ggTypingEvent.h
 
 
 

@@ -6,6 +6,7 @@ class SynchronizedQueue;
 
 struct ggEvent;
 struct ggLoginEvent;
+struct ggTypingEvent;
 struct gg_session;
 struct gg_event;
 struct gg_event_msg;
@@ -31,7 +32,7 @@ public:
 
     void connect(unsigned int uin,const std::string &pass);
     void sendMessage(unsigned int targetUin,const std::string &content);
-
+    void sendTypingNotification(unsigned int targetUin, int length);
     Wt::Signal<boost::shared_ptr<Event> > &eventSignal();
 private:
     gg_session *mpSession;
@@ -56,6 +57,7 @@ private:
     //process internal events.
     void processLoginEvent(ggLoginEvent& event);
     void processMessageEvent(ggMessageEvent &event);
+    void processTypingEvent(ggTypingEvent& event);
 };
 
 #endif // GGWRAPPER_H
