@@ -67,6 +67,14 @@ pre
 	background-color:#b0c4de;
 	width:450px;
 }
+.DialogWindowMenuItemTyping a
+{
+	color: #FFCC33;
+}
+.DialogWindowMenuItemGotMsg a
+{
+	color: #FF3333;
+}
 .DialogWindowTargetInfo
 {
 	margin-left: auto;

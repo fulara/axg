@@ -4,6 +4,7 @@
 class ContactInfo;
 class DialogWindow;
 class MessageEvent;
+class TypingNotificationEvent;
 #include <map>
 #include <Wt/WContainerWidget>
 class DialogWindowHolder : public Wt::WContainerWidget
@@ -16,6 +17,7 @@ public:
     void openDialogWindowRequest(ContactInfo contactinfo);
     void openDialogWindowAndActivateRequest(ContactInfo);
     void messageReceived(MessageEvent *msg);
+    void typingNotificationReceived(TypingNotificationEvent* event);
     Wt::Signal<unsigned int> &newContactInfoRequest();
     Wt::Signal<unsigned int, std::string> &sendMessageRequest();
     Wt::Signal<unsigned int, int> &sendTypingNotificationRequest();

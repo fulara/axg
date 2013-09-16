@@ -21,6 +21,7 @@
 #include "alivechecker.h"
 #include "Ui/dialogwindow.h"
 #include "messageevent.h"
+#include "TypingNotificationEvent.h"
 #include "ContactImportEvent.h"
 #include "Ui/contactlist.h"
 #include "Ui/contactwindow.h"
@@ -130,6 +131,9 @@ void AxgApplication::onEventUIThread(boost::shared_ptr<Event> event)
         case Event::ContactImport:
             onContactImport(event);
             break;
+        case Event::TypingNotification:
+            onTypingNotification(event);
+            break;
     }
     triggerUpdate();
 }
@@ -169,4 +173,9 @@ void AxgApplication::onLoginResult(boost::shared_ptr<Event> event)
         //mpLoginWindow->loginSignal().connect(mpWrapper,&GGWrapper::connect);
         doJavaScript("alert('Failed to login NYGGA!');");
     }
+}
+void AxgApplication::onTypingNotification(boost::shared_ptr<Event> event)
+{
+    TypingNotificationEvent* typingNotificationEvent = static_cast<TypingNotificationEvent*>(event.get());
+    this->mpDialogWindowHolder->typingNotificationReceived(typingNotificationEvent);
 }

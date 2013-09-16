@@ -14,7 +14,7 @@ HistoryEntry *HistoryEntry::createMyEntryDateNickname(const std::string date, co
     Wt::WText* dateWidget = new Wt::WText(std::string("(") + date + ")",newEntry);
     Wt::WText* nicknameWidget = new Wt::WText(nickname,newEntry);
     nicknameWidget->setInline(false);
-    Wt::WText* msgWidget = new Wt::WText(msg,newEntry);
+    Wt::WText* msgWidget = new Wt::WText(Wt::WString::fromUTF8(msg),newEntry);
     msgWidget->setInline(false);
     newEntry->addWidget(nicknameWidget);
     nicknameWidget->setStyleClass("ChatHistoryNick");
@@ -29,7 +29,7 @@ HistoryEntry *HistoryEntry::createMyEntryDate(const std::string date, const std:
 {
     HistoryEntry *newEntry = new HistoryEntry(parent);
     Wt::WText* dateWidget = new Wt::WText(std::string("(") + date + ")",newEntry);
-    Wt::WText* msgWidget = new Wt::WText(msg,newEntry);
+    Wt::WText* msgWidget = new Wt::WText(Wt::WString::fromUTF8(msg),newEntry);
     msgWidget->setInline(false);
     newEntry->addWidget(dateWidget);
     dateWidget->setStyleClass("ChatHistoryTimeStamp");
@@ -41,7 +41,7 @@ HistoryEntry *HistoryEntry::createMyEntryDate(const std::string date, const std:
 HistoryEntry *HistoryEntry::createMyEntry(const std::string &msg, Wt::WContainerWidget *parent)
 {
     HistoryEntry *newEntry = new HistoryEntry(parent);
-    Wt::WText* msgWidget = new Wt::WText(msg,newEntry);
+    Wt::WText* msgWidget = new Wt::WText(Wt::WString::fromUTF8(msg),newEntry);
     msgWidget->setInline(false);
     newEntry->addWidget(msgWidget);
     newEntry->setStyleClass("ChatHistoryEntryMine");
@@ -54,7 +54,7 @@ HistoryEntry *HistoryEntry::createTargetEntryDateNickname(const std::string date
     Wt::WText* dateWidget = new Wt::WText(std::string("(") + date + ")",newEntry);
     Wt::WText* nicknameWidget = new Wt::WText(nickname,newEntry);
     nicknameWidget->setInline(false);
-    Wt::WText* msgWidget = new Wt::WText(msg,newEntry);
+    Wt::WText* msgWidget = new Wt::WText(Wt::WString::fromUTF8(msg),newEntry);
     msgWidget->setInline(false);
     newEntry->addWidget(nicknameWidget);
     nicknameWidget->setStyleClass("ChatHistoryNick");
@@ -70,7 +70,7 @@ HistoryEntry *HistoryEntry::createTargetEntryDate(const std::string date, const 
 {
     HistoryEntry *newEntry = new HistoryEntry(parent);
     Wt::WText* dateWidget = new Wt::WText(std::string("(") + date + ")",newEntry);
-    Wt::WText* msgWidget = new Wt::WText(msg,newEntry);
+    Wt::WText* msgWidget = new Wt::WText(Wt::WString::fromUTF8(msg),newEntry);
     msgWidget->setInline(false);
     newEntry->addWidget(dateWidget);
     dateWidget->setStyleClass("ChatHistoryTimeStamp");
@@ -82,7 +82,7 @@ HistoryEntry *HistoryEntry::createTargetEntryDate(const std::string date, const 
 HistoryEntry *HistoryEntry::createTargetEntry(const std::string &msg, Wt::WContainerWidget *parent)
 {
     HistoryEntry *newEntry = new HistoryEntry(parent);
-    Wt::WText* msgWidget = new Wt::WText(msg,newEntry);
+    Wt::WText* msgWidget = new Wt::WText(Wt::WString::fromUTF8(msg),newEntry);
     msgWidget->setInline(false);
     newEntry->addWidget(msgWidget);
     newEntry->setStyleClass("ChatHistoryEntryTarget");

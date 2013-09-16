@@ -4,7 +4,7 @@
 class Event
 {
 public:
-    enum EventType { LoginResult,MessageRcv,ContactImport};
+    enum EventType { LoginResult,MessageRcv,ContactImport,TypingNotification};
     Event(){}
     Event(const EventType&) = delete;
     Event& operator=(const EventType&) = delete;

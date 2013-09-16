@@ -5,6 +5,7 @@
 #include <libgadu.h>
 #include <boost/thread.hpp>
 #include <boost/chrono.hpp>
+#include <boost/locale.hpp>
 #include <Wt/WSignal>
 
 #include <vector>
@@ -20,10 +21,13 @@
 
 #include "messageevent.h"
 #include "loginresultevent.h"
+#include "TypingNotificationEvent.h"
 #include "contactinfo.h"
 #include "ContactGroup.h"
 #include "ggmessageevent.h"
 #include "ggTypingEvent.h"
+
+#include "CharacterConversion.h"
 
 #include "ContactImportEvent.h"
 typedef boost::shared_ptr<Event> spEvent;
@@ -109,9 +113,22 @@ void GGWrapper::enterLoop()
     Logger::log("Finished Looping!");
     //probably here some cleaning or just do everything in destructor;
 }
+
+
 void GGWrapper::sendMessage(unsigned int targetUin, const std::string &content)
 {
-    addToEventLoop(ggEvent(ggEvent::MessageEvent,ggMessageEvent(targetUin,content)));
+    std::string toLog("Sending msg: " + content);
+    toLog += "\n Length was: ";
+    toLog += boost::lexical_cast<std::string>(content.size());
+    auto message = conversions::fromUtf8(content);
+    for(auto it = message.cbegin(); it != message.cend(); ++it)
+    {
+        char c = *it;
+        int intValue = (int)c;
+        toLog += std::string("Character : ") + c + "has value of " + boost::lexical_cast<std::string>(intValue) + " \n";
+    }
+    Logger::log(toLog);
+    addToEventLoop(ggEvent(ggEvent::MessageEvent,ggMessageEvent(targetUin,message)));
 }
 void GGWrapper::sendTypingNotification(unsigned int targetUin, int length)
 {
@@ -139,11 +156,23 @@ void GGWrapper::onRecvMsg(gg_event_msg& msg)
     toLog += boost::lexical_cast<std::string>(msg.msgclass);
     if(msg.msgclass & GG_CLASS_CHAT)
     {
+        unsigned int a;
         toLog += "\n content: ";
         std::string message((const char*)msg.message);
+        toLog += "\n lengthWas: ";
+        toLog += boost::lexical_cast<std::string>(message.size());
+        toLog += " ";
+        for(auto it = message.cbegin(); it != message.cend(); ++it)
+        {
+            char c = *it;
+            int intValue = (int)c;
+            toLog += std::string("Character : ") + c + "has value of " + boost::lexical_cast<std::string>(intValue) + " \n";
+        }
+        toLog += boost::lexical_cast<std::string>(a = (unsigned int)message.c_str()[0]);
+        toLog += "\n";
         toLog += message;
-
-        eventSignal().emit(spEvent(new MessageEvent(msg.sender,message)));
+        std::string decodedMsg = conversions::toUtf8(message);
+        eventSignal().emit(spEvent(new MessageEvent(msg.sender,decodedMsg)));
     }
 
     //toLog += std::string((const char*)msg.message);
@@ -210,8 +239,14 @@ void GGWrapper::onRecvContacts(gg_event_userlist100_reply& data)
     mpEventSignal->emit(spEvent(new ContactImportEvent(groupList)));
 }
 
+void GGWrapper::onRecvTypingNotification(gg_event_typing_notification& typingNotification)
+{
+    mpEventSignal->emit(spEvent(new TypingNotificationEvent(typingNotification.uin,typingNotification.length)));
+}
+
 void GGWrapper::processGGEvent(gg_event &ev)
 {
+
     switch(ev.type)
     {
         case GG_EVENT_NONE:		/**< Nie wydarzylo sie nic wartego uwagi */
@@ -247,18 +282,6 @@ void GGWrapper::processGGEvent(gg_event &ev)
             break;
         case GG_EVENT_CONN_SUCCESS:		/**< \brief Polaczono z serwerem. Pierwsza rzecza, jaka nalezy zrobic jest wyslanie listy kontaktów. */
             Logger::log("Received GG_EVENT_CONN_SUCCESS\n");
-            break;
-            /*if ( -1 != gg_notify(mpSession,NULL,0))
-            {
-                eventSignal().emit(spEvent(new LoginResultEvent(true)));
-
-
-                if ( -1 != gg_userlist100_request(mpSession,GG_USERLIST100_GET,0,GG_USERLIST100_FORMAT_TYPE_GG100,0))
-                {
-                    Logger::log("Succesfully requested userlist..?");
-                }
-            }*/
-
             break;
         case GG_EVENT_DISCONNECT:		/**< \brief Serwer zrywa polaczenie. Zdarza sie, gdy równolegle do serwera podlaczy sie druga sesja i trzeba zerwac polaczenie z pierwsza. */
             Logger::log("Received GG_EVENT_DISCONNECT\n");
@@ -350,6 +373,7 @@ void GGWrapper::processGGEvent(gg_event &ev)
             Logger::log("Received GG_EVENT_DISCONNECT_ACK\n");
             break;
         case GG_EVENT_TYPING_NOTIFICATION:	/**< Powiadomienie o pisaniu */
+            onRecvTypingNotification(reinterpret_cast<gg_event_typing_notification&>(ev.event));
             Logger::log("Received GG_EVENT_TYPING_NOTIFICATION\n");
 
             break;

@@ -1,5 +1,6 @@
 #pragma once
 
+
 class GGWrapper;
 class LoginWindow;
 class AliveChecker;
@@ -44,6 +45,7 @@ private:
     void onLoginResult(boost::shared_ptr<Event> event);
     void onMessageRcv(boost::shared_ptr<Event> event);
     void onContactImport(boost::shared_ptr<Event> event);
+    void onTypingNotification(boost::shared_ptr<Event> event);
 
 
 };

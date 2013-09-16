@@ -11,6 +11,7 @@ struct gg_session;
 struct gg_event;
 struct gg_event_msg;
 struct gg_event_user_data;
+struct gg_event_typing_notification;
 struct ggMessageEvent;
 struct gg_event_userlist100_reply;
 #include <string>
@@ -54,6 +55,7 @@ private:
     void onRecvMsg(gg_event_msg& msg);
     void onRecvOwnInfo(gg_event_user_data &data);
     void onRecvContacts(gg_event_userlist100_reply& data);
+    void onRecvTypingNotification(gg_event_typing_notification&);
     //process internal events.
     void processLoginEvent(ggLoginEvent& event);
     void processMessageEvent(ggMessageEvent &event);

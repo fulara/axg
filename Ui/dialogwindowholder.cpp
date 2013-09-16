@@ -9,6 +9,7 @@
 #include "dialogwindow.h"
 #include "dialogwindowholder.h"
 #include "messageevent.h"
+#include "TypingNotificationEvent.h"
 
 DialogWindowHolder::DialogWindowHolder(Wt::WContainerWidget *parent)
     : Wt::WContainerWidget(parent),
@@ -32,7 +33,8 @@ DialogWindowHolder::~DialogWindowHolder()
 }
 void DialogWindowHolder::onTabClosed(int index)
 {
-    auto tab = mpTabWidget->widget(index);
+    DialogWindow *tab = static_cast<DialogWindow*>(mpTabWidget->widget(index));
+    tab->updateMenuItem(NULL);
     mpTabWidget->removeTab(tab);
 
     if(mpTabWidget->count())
@@ -77,6 +79,15 @@ void DialogWindowHolder::messageReceived(MessageEvent *msg)
     DialogWindow *dialogWindow = getDialogWindowById(targetUin);
     dialogWindow->messageReceived(msg);
 }
+void DialogWindowHolder::typingNotificationReceived(TypingNotificationEvent *event)
+{
+    if(isDialogWindowOpen(event->fromUin))
+    {
+        DialogWindow* dialogWindow = getDialogWindowById(event->fromUin);
+        dialogWindow->handleTypingNotificationEvent(event);
+    }
+}
+
 Wt::Signal<unsigned int> &DialogWindowHolder::newContactInfoRequest()
 {
     return *mpNewContactInfoRequest;
@@ -87,11 +98,12 @@ DialogWindow* DialogWindowHolder::openDialogWindow(ContactInfo contactinfo)
     auto it =mDialogWindows.begin();
     if((it = mDialogWindows.find(contactinfo.uin)) != mDialogWindows.end())
     {
-        auto dialogWindow = it->second;
+        DialogWindow *dialogWindow = it->second;
         int index = mpTabWidget->indexOf(dialogWindow);
         if(index == -1)
         {
             auto menuItem = mpTabWidget->addTab(dialogWindow,contactinfo.getDisplayName(),Wt::WTabWidget::PreLoading);
+            dialogWindow->updateMenuItem(menuItem);
             menuItem->setCloseable(true);
             return dialogWindow;
         }
@@ -111,6 +123,7 @@ DialogWindow *DialogWindowHolder::createNewDialogWindow(ContactInfo contactInfo)
     auto menuItem = mpTabWidget->addTab(newDialogWindow,contactInfo.getDisplayName(),Wt::WTabWidget::PreLoading);
     menuItem->setCloseable(true);
 
+    newDialogWindow->updateMenuItem(menuItem);
     return newDialogWindow;
 }
 void DialogWindowHolder::forwardNotificationRequest(unsigned int targetUin, int length)

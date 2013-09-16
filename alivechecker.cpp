@@ -10,7 +10,7 @@ AliveChecker::AliveChecker(Wt::WContainerWidget *parent)
 
     :
       Wt::WObject(parent),
-      mTimeOut(10000),
+      mTimeOut(10),
       mpActiveTimer(new Wt::JSignal<void>(this,"IsWindowActive")),
       mpDiedSignal(new Wt::Signal<void>(this)),
       mLastJSUpdate(boost::posix_time::second_clock::local_time())

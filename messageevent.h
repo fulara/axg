@@ -11,7 +11,7 @@ public:
     {
 
     }
-
+    virtual ~MessageEvent(){}
     unsigned int fromUin;
     std::string content;
     EventType getType()

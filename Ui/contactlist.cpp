@@ -23,6 +23,10 @@ ContactList::ContactList(Wt::WContainerWidget *parent)
     mContacts.push_back(ContactInfo(2577961,"Olek","",true,true,true));
     addContact(6307826,"Pan LekPan LekPan LekPan Lek");
     mContacts.push_back(ContactInfo(6307826,"Pan Lek","",true,true,true));
+    addContact(3788407,"Pan Gucci");
+    mContacts.push_back(ContactInfo(3788407,"Pan Gucci","",true,true,true));
+    addContact(1067760,"Pan Baz");
+    mContacts.push_back(ContactInfo(1067760,"Pan Baz","",true,true,true));
 
 }
 ContactList::~ContactList()

@@ -53,7 +53,9 @@ HEADERS += \
     Ui/dialogwindowholder.h \
     WtUtilFuns.h \
     historymanager.h \
-    ggTypingEvent.h
+    ggTypingEvent.h \
+    TypingNotificationEvent.h \
+    CharacterConversion.h
 
 
 
@@ -69,20 +71,19 @@ INCLUDEPATH += /home/fular/includes/
 
 
 
+unix:!macx: LIBS += -L$$PWD/../../../libs/wt-3.3.1-rc1/build/src/http/ -lwthttp
 
-unix:!macx: LIBS += -L$$PWD/../../../libs/wt-3.3.0/build/src/http/ -lwthttp
+INCLUDEPATH += $$PWD/../../../libs/wt-3.3.1-rc1/includes
+DEPENDPATH += $$PWD/../../../libs/wt-3.3.1-rc1/build/src/http
 
-INCLUDEPATH += $$PWD/../../../libs/wt-3.3.0/includes
-DEPENDPATH += $$PWD/../../../libs/wt-3.3.0/build/src/http
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/wt-3.3.1-rc1/build/src/http/libwthttp.a
 
-unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/wt-3.3.0/build/src/http/libwthttp.a
+unix:!macx: LIBS += -L$$PWD/../../../libs/wt-3.3.1-rc1/build/src/ -lwt
 
-unix:!macx: LIBS += -L$$PWD/../../../libs/wt-3.3.0/build/src/ -lwt
+INCLUDEPATH += $$PWD/../../../libs/wt-3.3.1-rc1/includes
+DEPENDPATH += $$PWD/../../../libs/wt-3.3.1-rc1/build/src
 
-INCLUDEPATH += $$PWD/../../../libs/wt-3.3.0/includes
-DEPENDPATH += $$PWD/../../../libs/wt-3.3.0/build/src
-
-unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/wt-3.3.0/build/src/libwt.a
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/wt-3.3.1-rc1/build/src/libwt.a
 
 unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53_0/stage/lib/ -lboost_signals
 
@@ -136,6 +137,8 @@ unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/boost_1_53_0/stage/lib/libboos
 
 
 unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53_0/stage/lib/ -lboost_filesystem
+
+unix:!macx: LIBS += -L$$PWD/../../../libs/boost_1_53_0/stage/lib/ -lboost_locale
 
 INCLUDEPATH += $$PWD/../../../libs/boost_1_53_0
 DEPENDPATH += $$PWD/../../../libs/boost_1_53_0
