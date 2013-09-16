@@ -21,6 +21,7 @@ DialogWindowHolder::DialogWindowHolder(Wt::WContainerWidget *parent)
     setStyleClass("DialogWindowHolder");
     mpTabWidget->tabClosed().connect(this,&DialogWindowHolder::onTabClosed);
     mpTabWidget->currentChanged().connect(this,&DialogWindowHolder::activeChanged);
+    mCurrentlyActiveWindow = 0;
 }
 DialogWindowHolder::~DialogWindowHolder()
 {
@@ -40,9 +41,19 @@ void DialogWindowHolder::onTabClosed(int index)
     if(mpTabWidget->count())
     {
         if(mpTabWidget->count() == index)
+        {
             mpTabWidget->setCurrentIndex(index-1);
+            activeChanged(index-1);
+        }
         else
+        {
             mpTabWidget->setCurrentIndex(index);
+            activeChanged(index);
+        }
+    }
+    else
+    {
+        activeChanged(-1);
     }
 
 }
@@ -50,7 +61,22 @@ void DialogWindowHolder::onTabClosed(int index)
 void DialogWindowHolder::activeChanged(int index)
 {
     Logger::log("Index changed..");
-    //DialogWindow *window = static_cast<DialogWindow*>(mpTabWidget->widget(index));
+
+
+    if(mCurrentlyActiveWindow != 0)
+    {
+        mCurrentlyActiveWindow->deactivated();
+    }
+    if(index == -1)
+    {
+        mCurrentlyActiveWindow = 0;
+    }
+    else
+    {
+        DialogWindow *activeWindow = static_cast<DialogWindow*>(mpTabWidget->widget(index));
+        mCurrentlyActiveWindow = activeWindow;
+        mCurrentlyActiveWindow->activated();
+    }
 }
 bool DialogWindowHolder::isDialogWindowOpen(unsigned int targetUin)
 {
@@ -134,13 +160,18 @@ void DialogWindowHolder::forwardNotificationRequest(unsigned int targetUin, int 
 void DialogWindowHolder::openDialogWindowRequest(ContactInfo contactinfo)
 {
     openDialogWindow(contactinfo);
+    if(mpTabWidget->count() == 1)
+        activeChanged(0);
 }
 
 void DialogWindowHolder::openDialogWindowAndActivateRequest(ContactInfo contactInfo)
 {
     DialogWindow *dialogWindow = openDialogWindow(contactInfo);
+    if(mpTabWidget->count() == 1)
+        activeChanged(0);
     dialogWindow->focusOnTextArea();
     mpTabWidget->setCurrentWidget(dialogWindow);
+    //activeChanged(mpTabWidget->indexOf(dialogWindow));
 }
 
 Wt::Signal<unsigned int, std::string> &DialogWindowHolder::sendMessageRequest()

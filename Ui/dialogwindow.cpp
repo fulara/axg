@@ -7,6 +7,7 @@
 #include <Wt/WLabel>
 #include <Wt/WVBoxLayout>
 #include <Wt/WMenuItem>
+#include <Wt/WTimer>
 #include <stdlib.h>
 
 #include <boost/algorithm/string.hpp>
@@ -16,43 +17,55 @@
 #include "messageevent.h"
 #include "logger.h"
 #include "TypingNotificationEvent.h"
-
+#include "menuitemupdater.h"
 DialogWindow::DialogWindow(unsigned int targetUin, std::string targetName, Wt::WContainerWidget *parent)
     :
       Wt::WContainerWidget(parent),
-      mpMenuItem(NULL)
+      mIsActive(false),
+      mUnreadMsgCount(0),
+      mTargetUin(targetUin),
+      mTargetName(targetName),
+      mpMenuItemUpdater(new MenuItemUpdater(mTargetName,this))
 
 {
     setStyleClass("DialogWindow");
-    //Wt::WTable *table = new Wt::WTable();
-    mpTargetInfo = new Wt::WLabel(targetName,this);
+
+    initWidgets();
+
+    initAndConnectSignals();
+    initOnKeyUpJSTextArea();
+
+    focusOnTextArea();
+}
+DialogWindow::~DialogWindow()
+{
+    delete mpChatHistory;
+    delete mpMenuItemUpdater;
+}
+
+void DialogWindow::initWidgets()
+{
+    mpTargetInfo = new Wt::WLabel(mTargetName,this);
     mpTargetInfo->setStyleClass("DialogWindowTargetInfo");
     addWidget(mpTargetInfo);
     mpChatHistory = new ChatHistory(this);
-    mTargetUin = targetUin;
-    mTargetName = targetName;
+
     mpTextArea = new Wt::WTextArea();
     addWidget(mpTextArea);
     mpTextArea->setStyleClass("DialogWindowTextArea");
-
-    mpTextAreaEnterSignal = new Wt::JSignal<std::string>(this,"TextAreaEnterSignal");
-
-    mpTextAreaEnterSignal->connect(this,&DialogWindow::onTextAreaEnterPress);
-
-
-
     mpSendMessageButton = new Wt::WPushButton("Send Message To Da Guc");
     addWidget(mpSendMessageButton);
+}
+
+void DialogWindow::initAndConnectSignals()
+{
+    mpTextAreaEnterSignal = new Wt::JSignal<std::string>(this,"TextAreaEnterSignal");
+    mpTextAreaEnterSignal->connect(this,&DialogWindow::onTextAreaEnterPress);
     mpSendMessageButton->clicked().connect(this,&DialogWindow::onSendButton);
-
-
     mpSendMessageSignal = new Wt::Signal<unsigned int, std::string>(this);
     mpSendTypingNotificationSignal = new Wt::Signal<unsigned int, int>(this);
     mpTextLengthUpdateSignal = new Wt::JSignal<int>(this,"TextLengthUpdateSignal");
     mpTextLengthUpdateSignal->connect(this,&DialogWindow::onTextLengthUpdate);
-    initOnKeyUpJSTextArea();
-
-    focusOnTextArea();
 }
 void DialogWindow::initOnKeyUpJSTextArea()
 {
@@ -84,10 +97,21 @@ void DialogWindow::onTextLengthUpdate(int length)
     mpSendTypingNotificationSignal->emit(mTargetUin,length);
 }
 
-DialogWindow::~DialogWindow()
+
+void DialogWindow::deactivated()
 {
-    delete mpChatHistory;
+
+    mIsActive = false;
+    mpMenuItemUpdater->parentLostFocus();
 }
+void DialogWindow::activated()
+{
+    mIsActive = true;
+    mpMenuItemUpdater->parentGainedFocus();
+    mUnreadMsgCount = 0;
+
+}
+
 void DialogWindow::focusOnTextArea()
 {
     mpTextArea->setFocus();
@@ -117,44 +141,22 @@ void DialogWindow::messageReceived(MessageEvent *ev)
 {
     Logger::log(std::string("Received: ") + ev->content);
     mpChatHistory->addRecvMessage(ev->fromUin,ev->content);
+
+    if(!mIsActive)
+    {
+        ++mUnreadMsgCount;
+        mpMenuItemUpdater->onMessageRcv(mUnreadMsgCount);
+    }
 }
 void DialogWindow::handleTypingNotificationEvent(TypingNotificationEvent *ev)
 {
-    if(mpMenuItem == NULL)
-        return;
-    const std::string typingStyleClass("DialogWindowMenuItemTyping");
-    const std::string gotMsgStyleClass("DialogWindowMenuItemGotMsg");
-    if(ev->length == 0)
-    {
-        mpMenuItem->removeStyleClass(typingStyleClass);
-        return;
-    }
-    if(!mpMenuItem->hasStyleClass(typingStyleClass))
-    {
-        mpMenuItem->addStyleClass(typingStyleClass);
-        return;
-    }
-    if(!mpMenuItem->hasStyleClass(gotMsgStyleClass))
-    {
-        return;
-    }
-
-    std::string styleClasses = mpMenuItem->styleClass().narrow();
-    std::vector<std::string> styleClassesSplit;
-    boost::split(styleClassesSplit,styleClasses, boost::is_any_of(" "));
-    assert(styleClassesSplit.size() == 4);
-    if(styleClassesSplit.at(2) == typingStyleClass)
-    {
-        mpMenuItem->removeStyleClass(typingStyleClass);
-        mpMenuItem->addStyleClass(typingStyleClass);
-    }
-
-
+    mpMenuItemUpdater->onNotificationEvent(ev);
 }
+
 
 void DialogWindow::updateMenuItem(Wt::WMenuItem *newMenuItem)
 {
-    mpMenuItem = newMenuItem;
+    mpMenuItemUpdater->updateMenuItemReference(newMenuItem);
 }
 
 Wt::Signal<unsigned int,std::string> &DialogWindow::sendMessageRequest()
@@ -165,3 +167,4 @@ Wt::Signal<unsigned int, int> &DialogWindow::sendTypingNotificationRequest()
 {
     return *mpSendTypingNotificationSignal;
 }
+

@@ -28,6 +28,7 @@ private:
     Wt::Signal<unsigned int, std::string> *mpSendMessageSignal;
     Wt::Signal<unsigned int, int> *mpSendTypingNotificationSignal;
     std::map<unsigned int, DialogWindow*> mDialogWindows;
+    DialogWindow *mCurrentlyActiveWindow;
 
     DialogWindow *createNewDialogWindow(ContactInfo contactInfo);
     void activeChanged(int index);
