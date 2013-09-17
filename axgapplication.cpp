@@ -35,7 +35,7 @@ AxgApplication::AxgApplication(const Wt::WEnvironment& env)
     mpWrapper(new GGWrapper()),
     #ifndef LAYOUT_TEST
     mpLoginWindow(new LoginWindow(root())),
-    mpDialogWindowHolder(new DialogWindowHolder(root())),
+    mpDialogWindowHolder(new DialogWindowHolder(0,root())),
     #else
     mpDialogWindowHolder(new DialogWindowHolder(root())),
     mpContactWindow(new ContactWindow(root())),
@@ -156,7 +156,7 @@ void AxgApplication::onLoginResult(boost::shared_ptr<Event> event)
     {
         root()->removeWidget(mpLoginWindow);
         delete mpLoginWindow;
-        mpDialogWindowHolder = new DialogWindowHolder(this->root());
+        mpDialogWindowHolder = new DialogWindowHolder(loginResultEvent->uin,this->root());
         mpContactWindow = new ContactWindow(root());
         mpContactWindow->windowOpenRequest().connect(mpDialogWindowHolder,&DialogWindowHolder::openDialogWindowRequest);
         mpContactWindow->windowOpenRequestForceActivate().connect(mpDialogWindowHolder,&DialogWindowHolder::openDialogWindowAndActivateRequest);
@@ -167,10 +167,6 @@ void AxgApplication::onLoginResult(boost::shared_ptr<Event> event)
     else
     {
         mpLoginWindow->reset();
-        //delete mpWrapper;
-        //mpWrapper = new GGWrapper();
-        //mpWrapper->eventSignal().connect(this,&AxgApplication::onEvent);
-        //mpLoginWindow->loginSignal().connect(mpWrapper,&GGWrapper::connect);
         doJavaScript("alert('Failed to login NYGGA!');");
     }
 }

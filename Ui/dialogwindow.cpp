@@ -18,10 +18,12 @@
 #include "logger.h"
 #include "TypingNotificationEvent.h"
 #include "menuitemupdater.h"
-DialogWindow::DialogWindow(unsigned int targetUin, std::string targetName, Wt::WContainerWidget *parent)
+#include "History/historymanager.h"
+DialogWindow::DialogWindow(unsigned int userUin, unsigned int targetUin, std::string targetName, Wt::WContainerWidget *parent)
     :
       Wt::WContainerWidget(parent),
       mIsActive(false),
+      mUserUin(userUin),
       mUnreadMsgCount(0),
       mTargetUin(targetUin),
       mTargetName(targetName),
@@ -48,7 +50,7 @@ void DialogWindow::initWidgets()
     mpTargetInfo = new Wt::WLabel(mTargetName,this);
     mpTargetInfo->setStyleClass("DialogWindowTargetInfo");
     addWidget(mpTargetInfo);
-    mpChatHistory = new ChatHistory(this);
+    mpChatHistory = new ChatHistory(mTargetName,this);
 
     mpTextArea = new Wt::WTextArea();
     addWidget(mpTextArea);
@@ -120,26 +122,34 @@ void DialogWindow::focusOnTextArea()
     doJavaScript(ss.str());
 }
 
+void DialogWindow::onSendRequest(std::string toSend)
+{
+    mpSendMessageSignal->emit(mTargetUin,toSend);
+    mpChatHistory->addSentMessage(toSend);
+
+    HistoryManager::saveEntry(toSend,mUserUin,mTargetUin,true);
+}
+
 void DialogWindow::onSendButton()
 {
     if(mpTextArea->text().empty())
         return;
     auto narrowed = mpTextArea->text().toUTF8();
-    mpSendMessageSignal->emit(mTargetUin,narrowed);
-    mpChatHistory->addSentMessage(narrowed);
+    onSendRequest(narrowed);
     mpTextArea->setText("");
 
 }
 void DialogWindow::onTextAreaEnterPress(std::string content)
 {
     Logger::log(content);
-    mpSendMessageSignal->emit(mTargetUin,content);
-    mpChatHistory->addSentMessage(content);
+    onSendRequest(content);
 }
 
 void DialogWindow::messageReceived(MessageEvent *ev)
 {
     Logger::log(std::string("Received: ") + ev->content);
+
+    HistoryManager::saveEntry(ev->content, mUserUin, ev->fromUin,false);
     mpChatHistory->addRecvMessage(ev->fromUin,ev->content);
 
     if(!mIsActive)

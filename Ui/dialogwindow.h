@@ -14,7 +14,7 @@ class MenuItemUpdater;
 class DialogWindow : public Wt::WContainerWidget
 {
 public:
-    DialogWindow(unsigned int targetUin, std::string targetName, Wt::WContainerWidget *parent = 0);
+    DialogWindow(unsigned int userUin,unsigned int targetUin, std::string targetName, Wt::WContainerWidget *parent = 0);
     ~DialogWindow();
 
     Wt::Signal<unsigned int,std::string> &sendMessageRequest();
@@ -27,8 +27,10 @@ public:
     void messageReceived(MessageEvent *ev);
     void handleTypingNotificationEvent(TypingNotificationEvent *ev);
 
+    void onSendRequest(std::string narrowed);
 private:
     bool mIsActive;
+    unsigned int mUserUin;
     unsigned int mUnreadMsgCount;
     unsigned int mTargetUin;
     std::string mTargetName;

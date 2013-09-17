@@ -10,7 +10,7 @@ class TypingNotificationEvent;
 class DialogWindowHolder : public Wt::WContainerWidget
 {
 public:
-    DialogWindowHolder(Wt::WContainerWidget *parent = 0);
+    DialogWindowHolder(const unsigned int userUin,Wt::WContainerWidget *parent = 0);
     ~DialogWindowHolder();
 
     DialogWindow* openDialogWindow(ContactInfo contactinfo);
@@ -23,6 +23,8 @@ public:
     Wt::Signal<unsigned int, int> &sendTypingNotificationRequest();
 
 private:
+
+    const unsigned int mUserUin;
     Wt::WTabWidget *mpTabWidget;
     Wt::Signal<unsigned int> *mpNewContactInfoRequest;
     Wt::Signal<unsigned int, std::string> *mpSendMessageSignal;

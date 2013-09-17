@@ -9,7 +9,7 @@
 class ChatHistory
 {
 public:
-    ChatHistory(Wt::WContainerWidget *parent);
+    ChatHistory(std::string targetName,Wt::WContainerWidget *parent);
 
     void addSentMessage(std::string&);
     void addRecvMessage(unsigned int fromUin,std::string&);
@@ -22,6 +22,7 @@ public:
 private:
     bool mIsFirstEntryEver;
     bool mWasLastMessageMine;
+    std::string mTargetName;
     boost::posix_time::ptime mLastHistoryEntryTimeStamp;
     Wt::WTable *mpTable;
     Wt::WContainerWidget *mpParent;

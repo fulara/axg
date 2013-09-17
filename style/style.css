@@ -103,6 +103,11 @@ pre
 	background-color:#f0f0f0;
 	table-layout:fixed;
 }
+.FirstHistoryEntry
+{
+	background-color:#FF0000;
+	height: 50px;
+}
 .ChatHistoryEntryMine
 {	
 	background-color:#F6F9ED;

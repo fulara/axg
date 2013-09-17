@@ -4,12 +4,6 @@
 #include <Wt/WString>
 #include <map>
 #include "logger.h"
-void encode_utf8(std::string &inout)
-{
-    Wt::WString str(Wt::WString::fromUTF8(inout));
-    inout = boost::locale::conv::from_utf(str.operator std::wstring(),"Latin2");
-
-}
 namespace conversions
 {
     bool isMapInitialized = false;
@@ -31,6 +25,7 @@ namespace conversions
         ggToLatin1[-113] = -84;
         ggToLatin1[-100] = -74;
         ggToLatin1[-116] = -90;
+        isMapInitialized = true;
     }
 
 std::string fromUtf8(const std::string &utf8)
@@ -42,7 +37,6 @@ std::string fromUtf8(const std::string &utf8)
     Logger::log("Inside frm utf...");
     for(auto it = encoded.begin(); it != encoded.end(); ++it)
     {
-        Logger::log(std::string("Going on at..") + boost::lexical_cast<std::string>((int)*it));
         auto findIt = latin1ToGG.find((int)*it);
         if(findIt != latin1ToGG.end())
         {
@@ -59,7 +53,6 @@ std::string toUtf8(const std::string &msg)
     auto encoded = msg;
     for(auto it = encoded.begin(); it != encoded.end(); ++it)
     {
-        Logger::log(std::string("Going on at..") + boost::lexical_cast<std::string>((int)*it));
         auto findIt = ggToLatin1.find((int)*it);
         if(findIt != ggToLatin1.end())
         {

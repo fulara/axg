@@ -117,17 +117,7 @@ void GGWrapper::enterLoop()
 
 void GGWrapper::sendMessage(unsigned int targetUin, const std::string &content)
 {
-    std::string toLog("Sending msg: " + content);
-    toLog += "\n Length was: ";
-    toLog += boost::lexical_cast<std::string>(content.size());
     auto message = conversions::fromUtf8(content);
-    for(auto it = message.cbegin(); it != message.cend(); ++it)
-    {
-        char c = *it;
-        int intValue = (int)c;
-        toLog += std::string("Character : ") + c + "has value of " + boost::lexical_cast<std::string>(intValue) + " \n";
-    }
-    Logger::log(toLog);
     addToEventLoop(ggEvent(ggEvent::MessageEvent,ggMessageEvent(targetUin,message)));
 }
 void GGWrapper::sendTypingNotification(unsigned int targetUin, int length)
@@ -150,33 +140,12 @@ void GGWrapper::sendPing()
 
 void GGWrapper::onRecvMsg(gg_event_msg& msg)
 {
-    std::string toLog("Received Message from: ");
-    toLog += boost::lexical_cast<std::string>(msg.sender);
-    toLog +="containing :" ;
-    toLog += boost::lexical_cast<std::string>(msg.msgclass);
     if(msg.msgclass & GG_CLASS_CHAT)
     {
-        unsigned int a;
-        toLog += "\n content: ";
         std::string message((const char*)msg.message);
-        toLog += "\n lengthWas: ";
-        toLog += boost::lexical_cast<std::string>(message.size());
-        toLog += " ";
-        for(auto it = message.cbegin(); it != message.cend(); ++it)
-        {
-            char c = *it;
-            int intValue = (int)c;
-            toLog += std::string("Character : ") + c + "has value of " + boost::lexical_cast<std::string>(intValue) + " \n";
-        }
-        toLog += boost::lexical_cast<std::string>(a = (unsigned int)message.c_str()[0]);
-        toLog += "\n";
-        toLog += message;
         std::string decodedMsg = conversions::toUtf8(message);
         eventSignal().emit(spEvent(new MessageEvent(msg.sender,decodedMsg)));
     }
-
-    //toLog += std::string((const char*)msg.message);
-    Logger::log(toLog);
 }
 void GGWrapper::onRecvOwnInfo(gg_event_user_data &data)
 {
@@ -188,12 +157,14 @@ void GGWrapper::onRecvOwnInfo(gg_event_user_data &data)
     {
         std::map<std::string,std::string> attributes;
         gg_event_user_data_user &userData = data.users[userIndex];
-        //Logger::log(std::string("info from: ") + boost::lexical_cast<std::string>(userData.uin));
+        Logger::log(std::string("info from: ") + boost::lexical_cast<std::string>(userData.uin));
         for(unsigned int attriIndex = 0 ; attriIndex < userData.attr_count;  ++attriIndex)
         {
             gg_event_user_data_attr &attri =  userData.attrs[attriIndex];
             std::string attriKey(attri.key);
             std::string attriValue(attri.value);
+
+            Logger::log("Attri" + attriKey + " attriValue" + attriValue);
         }
 
     }
@@ -223,7 +194,6 @@ void GGWrapper::onRecvContacts(gg_event_userlist100_reply& data)
         bool isNormal = convertSBMap[it->child("FlagNormal").child_value()];
         bool isFriend = convertSBMap[it->child("FlagFriend").child_value()];
         std::string groupId = it->child("Groups").child("GroupId").child_value();
-        Logger::log(groupId + " groupIdContact");
         mapContacts[groupId].push_back(ContactInfo(uin,showName,nickName,isBuddy,isNormal,isFriend));
     }
     for(auto it = groups.begin(); it != groups.end(); ++it)
@@ -274,11 +244,6 @@ void GGWrapper::processGGEvent(gg_event &ev)
             break;
         case GG_EVENT_CONN_FAILED:		/**< \brief Nie udalo sie polaczyc */
             Logger::log("Received GG_EVENT_CONN_FAILED\n");
-            eventSignal().emit(spEvent(new LoginResultEvent(false)));
-            mpSession = 0;
-            throw std::exception();
-            //gg_free_session(mpSession);
-
             break;
         case GG_EVENT_CONN_SUCCESS:		/**< \brief Polaczono z serwerem. Pierwsza rzecza, jaka nalezy zrobic jest wyslanie listy kontaktów. */
             Logger::log("Received GG_EVENT_CONN_SUCCESS\n");
@@ -433,7 +398,7 @@ void GGWrapper::processLoginEvent(ggLoginEvent &event)
     p.async = 0;
     if((mpSession = gg_login(&p)) && gg_notify(mpSession,NULL,0) != -1)
     {
-        eventSignal().emit(spEvent(new LoginResultEvent(true)));
+        eventSignal().emit(spEvent(new LoginResultEvent(true,event.uin)));
         if ( -1 != gg_userlist100_request(mpSession,GG_USERLIST100_GET,0,GG_USERLIST100_FORMAT_TYPE_GG100,0))
         {
             Logger::log("Succesfully requested userlist..?");

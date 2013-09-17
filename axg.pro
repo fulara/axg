@@ -20,8 +20,10 @@ SOURCES += main.cpp \
     Ui/contactwindow.cpp \
     Ui/dialogwindowholder.cpp \
     WtUtilFuns.cpp \
-    historymanager.cpp \
-    Ui/menuitemupdater.cpp
+    Ui/menuitemupdater.cpp \
+    History/historymanager.cpp \
+    Utils/formattingutils.cpp \
+    Ui/firsthistoryentry.cpp
 
 
 
@@ -53,11 +55,14 @@ HEADERS += \
     ContactImportEvent.h \
     Ui/dialogwindowholder.h \
     WtUtilFuns.h \
-    historymanager.h \
     ggTypingEvent.h \
     TypingNotificationEvent.h \
     CharacterConversion.h \
-    Ui/menuitemupdater.h
+    Ui/menuitemupdater.h \
+    History/historymanager.h \
+    History/historypack.h \
+    Utils/formattingutils.h \
+    Ui/firsthistoryentry.h
 
 
 

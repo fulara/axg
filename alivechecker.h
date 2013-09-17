@@ -8,7 +8,6 @@
 #include <Wt/WJavaScript>
 #include <Wt/WSignal>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
 class AliveChecker : public Wt::WObject

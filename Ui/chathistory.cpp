@@ -10,30 +10,15 @@
 #include "chathistory.h"
 #include "historyentry.h"
 #include "logger.h"
+#include "Utils/formattingutils.h"
+#include "firsthistoryentry.h"
 
+using namespace FormattingUtils;
 
-std::string dateToStr(const boost::posix_time::ptime &time)
-{
-    boost::posix_time::time_facet* facet = new boost::posix_time::time_facet("%Y-%m-%d %H:%M:%S");
-    std::stringstream ss;
-    ss.imbue(std::locale(ss.getloc(), facet));
-    ss << time;
-    return ss.str();
-}
-std::string dateToTimeStr(const boost::posix_time::ptime &time)
-{
-    boost::posix_time::time_facet* facet = new boost::posix_time::time_facet("%H:%M:%S");
-    std::stringstream ss;
-    ss.imbue(std::locale(ss.getloc(), facet));
-    ss << time;
-    return ss.str();
-}
-
-
-ChatHistory::ChatHistory(Wt::WContainerWidget *parent)
+ChatHistory::ChatHistory(std::string targetName, Wt::WContainerWidget *parent)
 {
     mpParent = parent;
-
+    mTargetName = targetName;
     mpScrollArea = new Wt::WScrollArea();
     parent->addWidget(mpScrollArea);
     mpScrollArea->setWidget(mpTable = new Wt::WTable());
@@ -44,6 +29,8 @@ ChatHistory::ChatHistory(Wt::WContainerWidget *parent)
     mLastHistoryEntryTimeStamp -=  boost::posix_time::hours(1);
     mIsFirstEntryEver = true;
 
+    auto cell = mpTable->elementAt(0,0);
+    cell->addWidget(new FirstHistoryEntry(cell));
 
 }
 
@@ -123,7 +110,7 @@ void ChatHistory::AddNewRecvHistoryEntry(std::string &message)
     bool includeNick = (mIsFirstEntryEver || mWasLastMessageMine);
 
     if(includeNick)
-        cell->addWidget(HistoryEntry::createTargetEntryDateNickname(timeAsText,"Nie-Ja",message,cell));
+        cell->addWidget(HistoryEntry::createTargetEntryDateNickname(timeAsText,mTargetName,message,cell));
     else if(includeTimeStamp)
         cell->addWidget(HistoryEntry::createTargetEntryDate(timeAsText,message,cell));
     else

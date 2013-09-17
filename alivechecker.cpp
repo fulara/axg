@@ -10,7 +10,7 @@ AliveChecker::AliveChecker(Wt::WContainerWidget *parent)
 
     :
       Wt::WObject(parent),
-      mTimeOut(10),
+      mTimeOut(15),
       mpActiveTimer(new Wt::JSignal<void>(this,"IsWindowActive")),
       mpDiedSignal(new Wt::Signal<void>(this)),
       mLastJSUpdate(boost::posix_time::second_clock::local_time())
@@ -57,7 +57,7 @@ void AliveChecker::onTimeout()
     mMutex.unlock();
     if (timeSpan.seconds() > mTimeOut)
     {
-        //we are dead;
+        Logger::log("Emiting We Are Dead SIGNAL!");
         mpDiedSignal->emit();
     }
 }

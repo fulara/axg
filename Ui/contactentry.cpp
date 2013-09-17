@@ -9,9 +9,9 @@
 
 void ContactEntry::ensureProperTextLength(std::string& text)
 {
-    if(text.size() > 20)
+    if(text.size() > 17)
     {
-        text.resize(17);
+        text.resize(15);
         text.append("...");
     }
 }

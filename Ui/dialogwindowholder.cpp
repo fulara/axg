@@ -11,8 +11,9 @@
 #include "messageevent.h"
 #include "TypingNotificationEvent.h"
 
-DialogWindowHolder::DialogWindowHolder(Wt::WContainerWidget *parent)
+DialogWindowHolder::DialogWindowHolder(const unsigned int userUin, Wt::WContainerWidget *parent)
     : Wt::WContainerWidget(parent),
+      mUserUin(userUin),
       mpTabWidget(new Wt::WTabWidget(this)),
       mpNewContactInfoRequest(new Wt::Signal<unsigned int>(this)),
       mpSendMessageSignal(new Wt::Signal<unsigned int, std::string>(this)),
@@ -142,7 +143,7 @@ DialogWindow* DialogWindowHolder::openDialogWindow(ContactInfo contactinfo)
 }
 DialogWindow *DialogWindowHolder::createNewDialogWindow(ContactInfo contactInfo)
 {
-    DialogWindow* newDialogWindow = new DialogWindow(contactInfo.uin,contactInfo.getDisplayName());
+    DialogWindow* newDialogWindow = new DialogWindow(mUserUin,contactInfo.uin,contactInfo.getDisplayName());
     newDialogWindow->sendMessageRequest().connect(this,&DialogWindowHolder::sendMessageForward);
     newDialogWindow->sendTypingNotificationRequest().connect(this, &DialogWindowHolder::forwardNotificationRequest);
     mDialogWindows.insert(std::make_pair(contactInfo.uin,newDialogWindow));
