@@ -35,14 +35,15 @@ public:
         const int sleepPeriod = 10;
         while(timeOut)
         {
-            lock_guard<boost::mutex> lock(mMutex);
+            mMutex.lock();
             if(mList.size())
             {
                 boost::any item(mList.front());
                 mList.pop_front();;
-
+                mMutex.unlock();
                 return item;
             }
+            mMutex.unlock();
             boost::this_thread::sleep_for(boost::chrono::milliseconds(sleepPeriod));
             timeOut -= sleepPeriod;
         }
