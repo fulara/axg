@@ -26,7 +26,7 @@
 #include "ContactGroup.h"
 #include "ggmessageevent.h"
 #include "ggTypingEvent.h"
-
+#include "Utils/formattingutils.h"
 #include "CharacterConversion.h"
 
 #include "ContactImportEvent.h"
@@ -34,7 +34,7 @@ typedef boost::shared_ptr<Event> spEvent;
 GGWrapper::GGWrapper()
     :
       mpSession(NULL),
-      mpQueue( new SynchronizedQueue<ggEvent>()),
+      mpQueue( new SynchronizedQueue()),
       mpEventSignal(new Wt::Signal<boost::shared_ptr<Event>>())
 {
     gg_debug_level = 255;
@@ -144,7 +144,8 @@ void GGWrapper::onRecvMsg(gg_event_msg& msg)
     {
         std::string message((const char*)msg.message);
         std::string decodedMsg = conversions::toUtf8(message);
-        eventSignal().emit(spEvent(new MessageEvent(msg.sender,decodedMsg)));
+        eventSignal().emit(spEvent(new MessageEvent(msg.sender,decodedMsg,boost::posix_time::from_time_t(msg.time))));
+        Logger::log(message + " sent at " + FormattingUtils::dateToStr(boost::posix_time::from_time_t(msg.time)));
     }
 }
 void GGWrapper::onRecvOwnInfo(gg_event_user_data &data)

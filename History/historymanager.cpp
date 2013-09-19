@@ -1,15 +1,23 @@
 #include <boost/filesystem.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/foreach.hpp>
+#include <Wt/WServer>
 #include "historymanager.h"
 #include "synchronizedqueue.h"
+#include "LoginPackage.h"
 #include "historypack.h"
+#include "HistoryRequest.h"
 #include "Utils/formattingutils.h"
+#include "parsedhistoryentry.h"
 #include "logger.h"
+#include "Ui/chathistory.h"
+
+boost::regex HistoryManager::msMsgEntryWidget("^\\[(\\S+ \\S+)\\]-(R|S)-(.*)$");
 HistoryManager::HistoryManager()
 {
     boost::filesystem::create_directory("history");
-    mpQueue = new SynchronizedQueue<spHistoryPack>();
+    mpQueue = new SynchronizedQueue();
     new boost::thread(boost::bind(&HistoryManager::loop,this));
 }
 
@@ -25,44 +33,179 @@ void HistoryManager::loop()
     while(true)
     {
         boost::any polled = mpQueue->poll();
+
         if(!polled.empty())
         {
-            spHistoryPack sphp = boost::any_cast<spHistoryPack>(polled);
-            Logger::log("hai");
-            processPack(sphp);
+            if(polled.type() == typeid(spHistoryPack))
+            {
+                spHistoryPack sphp = boost::any_cast<spHistoryPack>(polled);
+                processPack(sphp);
+            }
+            else if(polled.type() == typeid(spHistoryRequest))
+            {
+                spHistoryRequest request = boost::any_cast<spHistoryRequest>(polled);
+                processRequest(request);
+            }
+            else if(polled.type() == typeid(LoginPackage))
+            {
+                LoginPackage loginPackage = boost::any_cast<LoginPackage>(polled);
+                processLogin(loginPackage);
+            }
+            else
+            {
+            }
+
         }
     }
 }
+void HistoryManager::informAboutLogin(unsigned int uin)
+{
+    HistoryManager &manager = getInstance();
+    manager.mpQueue->push_back(LoginPackage(uin));
+}
 
-void HistoryManager::saveEntry(const std::string &msg, const unsigned int userUin, const unsigned int talkingWith, const bool isSent)
+void HistoryManager::requestHistory(ChatHistory *caller, const unsigned int ownerUin, const unsigned int talkingWith, const std::string& owningSessionId)
 {
     HistoryManager &manager = getInstance();
 
-    manager.mpQueue->push_back(spHistoryPack(new HistoryPack(msg,userUin,talkingWith,isSent)));
+    manager.mpQueue->push_back(spHistoryRequest(new HistoryRequest(caller,ownerUin,talkingWith,owningSessionId)));
+}
+
+void HistoryManager::saveRcvEntry(const std::string &msg, const unsigned int userUin, const unsigned int talkingWith)
+{
+    HistoryManager &manager = getInstance();
+
+    manager.mpQueue->push_back(spHistoryPack(new HistoryPack(msg,userUin,talkingWith,false)));
+}
+void HistoryManager::saveSendEntry(const std::string &msg, const unsigned int userUin, const unsigned int talkingWith)
+{
+    HistoryManager &manager = getInstance();
+
+    manager.mpQueue->push_back(spHistoryPack(new HistoryPack(msg,userUin,talkingWith,true)));
+}
+void HistoryManager::clearLastChat(unsigned int ownerUin, unsigned int talkingWith)
+{
+    auto itPair = mAlreadyClearedDirs.equal_range(ownerUin);
+    bool found = false;
+    for(auto it = itPair.first; it != itPair.second; ++it)
+    {
+        if(it->second == talkingWith)
+            found = true;
+    }
+    if (found)
+        return;
+    std::string storagePath = getPathForHistoryStorage(ownerUin,talkingWith);
+    std::string path = storagePath + "/CurrentConversation";
+    if(!boost::filesystem::exists(path))
+        return;
+
+    std::list<ParsedHistoryEntry> entries(parseHistoryEntries(path));
+    BOOST_FOREACH(ParsedHistoryEntry &entry,entries)
+    {
+        if(entry.time.is_not_a_date_time())
+            continue;
+        std::string fileName = storagePath + "/" + FormattingUtils::dateToDayStr(entry.time);
+        std::ofstream os(fileName, std::ofstream::app);
+        appendEntryToFile(os,!entry.isReceived,entry.time,entry.content);
+    }
+    boost::filesystem::remove(path);
+    mAlreadyClearedDirs.insert(std::make_pair(ownerUin,talkingWith));
+}
+void HistoryManager::processLogin(LoginPackage loginPackage)
+{
+    mAlreadyClearedDirs.erase(loginPackage.loggedUin);
 }
 
 void HistoryManager::processPack(spHistoryPack pack)
 {
+    clearLastChat(pack->ownerUin,pack->talkingWith);
     boost::posix_time::ptime saveTime = boost::posix_time::second_clock::local_time();
     createNeededDirectories(pack->ownerUin,pack->talkingWith);
 
-    spOfstream spof(getFile(getPathForHistoryStorage(pack->ownerUin,pack->talkingWith),FormattingUtils::dateToDayStr(saveTime)));
+    spOfstream spof(getFileAppend(getPathForHistoryStorage(pack->ownerUin,pack->talkingWith),FormattingUtils::dateToDayStr(saveTime)));
     std::ofstream& of = *spof.get();
-    of << "" << FormattingUtils::dateToStr(saveTime) << "";
-    if(pack->isSent)
+    appendEntryToFile(of,pack->isSent,saveTime,pack->content);
+
+
+}
+void HistoryManager::appendEntryToFile(std::ofstream &os, bool isSent, const boost::posix_time::ptime &saveTime, const std::string &content)
+{
+    os << std::endl;
+    os << "[" << FormattingUtils::dateToStr(saveTime) << "]";
+    if(isSent)
     {
-        of << "-S-"  << boost::lexical_cast<std::string>(pack->ownerUin) << "-";
+        os << "-S-";
     }
     else
     {
-        of << "-R-" << boost::lexical_cast<std::string>(pack->talkingWith) << "-";
+        os << "-R-";
     }
-    of << pack->content << std::endl;
-
+    os << content;
 }
-spOfstream HistoryManager::getFile(const std::string &path, const std::string &day)
+
+std::list<ParsedHistoryEntry> HistoryManager::parseHistoryEntries(const std::string &path)
 {
-    return spOfstream(new std::ofstream(path + "/" + day, std::ofstream::app));
+    std::ifstream is(path);
+    const int buffSize = 2048;
+    char buff[buffSize];
+    std::string line;
+    std::string msgContent;
+    boost::posix_time::ptime time;
+    bool isRcv = false;
+    std::list<ParsedHistoryEntry> entries;
+    while(!is.eof())
+    {
+        boost::match_results< std::string::const_iterator > matches;
+        is.getline(buff,buffSize);
+        line = buff;
+        if(boost::regex_match(line,matches,msMsgEntryWidget))
+        {
+            if(msgContent.size())
+            {
+                entries.push_back(ParsedHistoryEntry(isRcv,time,msgContent));
+            }
+            const std::string timeAsStr = matches[1];
+            time =FormattingUtils::parseTime(timeAsStr);
+            const std::string rOrS = matches[2];
+            isRcv = rOrS == "R";
+            msgContent = matches[3];
+
+        }
+        else
+        {
+            msgContent.push_back('\n');
+            msgContent += line;
+        }
+
+    }
+    if(msgContent.size())
+    {
+        entries.push_back(ParsedHistoryEntry(isRcv,time,msgContent));
+    }
+
+    return std::move(entries);
+}
+
+void HistoryManager::processRequest(spHistoryRequest requestHistory)
+{
+    clearLastChat(requestHistory->ownerUin,requestHistory->talkingWith);
+    std::list<ParsedHistoryEntry> entries(parseHistoryEntries(getPathForHistoryStorage(requestHistory->ownerUin,requestHistory->talkingWith) + "/" + FormattingUtils::dateToDayStr(boost::posix_time::second_clock::local_time())));
+
+    ChatHistory * const requester = requestHistory->requester;
+    Wt::WServer::instance()->post(requestHistory->owningSessionId,std::bind(
+                          [entries,requester]()
+    {
+        requester->handleParsedHistoryEntries(entries);
+    }
+                          ));
+}
+spIfstream HistoryManager::getFileRead(const std::string &path, const std::string &day)
+{
+    return spIfstream(new std::ifstream(path + "/" + day));
+}
+spOfstream HistoryManager::getFileAppend(const std::string &path, const std::string &day)
+{
+    return spOfstream(new std::ofstream(path + "/CurrentConversation", std::ofstream::app));
 }
 
 void HistoryManager::createNeededDirectories(const unsigned int ownerUin, const unsigned int talkingWith)

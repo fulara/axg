@@ -62,7 +62,10 @@ HEADERS += \
     History/historymanager.h \
     History/historypack.h \
     Utils/formattingutils.h \
-    Ui/firsthistoryentry.h
+    Ui/firsthistoryentry.h \
+    History/HistoryRequest.h \
+    History/parsedhistoryentry.h \
+    History/LoginPackage.h
 
 
 

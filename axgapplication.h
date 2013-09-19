@@ -33,6 +33,7 @@ private:
     Wt::JSignal<void> *mpWindowUnloadSignal;
     void initJSScripts();
     void initConnections();
+    void multipleSessionsCheck(unsigned int uin);
     static std::clock_t begin;
 
 /////////////////////////////////////////////

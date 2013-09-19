@@ -50,7 +50,7 @@ void DialogWindow::initWidgets()
     mpTargetInfo = new Wt::WLabel(mTargetName,this);
     mpTargetInfo->setStyleClass("DialogWindowTargetInfo");
     addWidget(mpTargetInfo);
-    mpChatHistory = new ChatHistory(mTargetName,this);
+    mpChatHistory = new ChatHistory(mUserUin,mTargetUin,mTargetName,this);
 
     mpTextArea = new Wt::WTextArea();
     addWidget(mpTextArea);
@@ -127,7 +127,7 @@ void DialogWindow::onSendRequest(std::string toSend)
     mpSendMessageSignal->emit(mTargetUin,toSend);
     mpChatHistory->addSentMessage(toSend);
 
-    HistoryManager::saveEntry(toSend,mUserUin,mTargetUin,true);
+    HistoryManager::saveSendEntry(toSend,mUserUin,mTargetUin);
 }
 
 void DialogWindow::onSendButton()
@@ -141,16 +141,13 @@ void DialogWindow::onSendButton()
 }
 void DialogWindow::onTextAreaEnterPress(std::string content)
 {
-    Logger::log(content);
     onSendRequest(content);
 }
 
 void DialogWindow::messageReceived(MessageEvent *ev)
 {
-    Logger::log(std::string("Received: ") + ev->content);
-
-    HistoryManager::saveEntry(ev->content, mUserUin, ev->fromUin,false);
-    mpChatHistory->addRecvMessage(ev->fromUin,ev->content);
+    HistoryManager::saveRcvEntry(ev->content, mUserUin, ev->fromUin);
+    mpChatHistory->addRecvMessage(ev->fromUin,ev->content,ev->time);
 
     if(!mIsActive)
     {

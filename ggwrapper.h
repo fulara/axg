@@ -1,7 +1,6 @@
 #ifndef GGWRAPPER_H
 #define GGWRAPPER_H
 
-template <class T>
 class SynchronizedQueue;
 
 struct ggEvent;
@@ -37,7 +36,7 @@ public:
     Wt::Signal<boost::shared_ptr<Event> > &eventSignal();
 private:
     gg_session *mpSession;
-    SynchronizedQueue<ggEvent> *mpQueue;
+    SynchronizedQueue *mpQueue;
     Wt::Signal<boost::shared_ptr<Event> > *mpEventSignal;
     boost::thread mWorkerThread;
     boost::posix_time::ptime mTimeSinceLastPing;

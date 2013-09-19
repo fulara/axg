@@ -26,6 +26,8 @@
 #include "Ui/contactlist.h"
 #include "Ui/contactwindow.h"
 
+#include "History/historymanager.h"
+
 using namespace Wt;
 
 
@@ -157,6 +159,8 @@ void AxgApplication::onLoginResult(boost::shared_ptr<Event> event)
         root()->removeWidget(mpLoginWindow);
         delete mpLoginWindow;
         mpDialogWindowHolder = new DialogWindowHolder(loginResultEvent->uin,this->root());
+        HistoryManager::informAboutLogin(loginResultEvent->uin);
+        multipleSessionsCheck(loginResultEvent->uin);
         mpContactWindow = new ContactWindow(root());
         mpContactWindow->windowOpenRequest().connect(mpDialogWindowHolder,&DialogWindowHolder::openDialogWindowRequest);
         mpContactWindow->windowOpenRequestForceActivate().connect(mpDialogWindowHolder,&DialogWindowHolder::openDialogWindowAndActivateRequest);
@@ -170,6 +174,10 @@ void AxgApplication::onLoginResult(boost::shared_ptr<Event> event)
         doJavaScript("alert('Failed to login NYGGA!');");
     }
 }
+void AxgApplication::multipleSessionsCheck(unsigned int uin)
+{
+}
+
 void AxgApplication::onTypingNotification(boost::shared_ptr<Event> event)
 {
     TypingNotificationEvent* typingNotificationEvent = static_cast<TypingNotificationEvent*>(event.get());

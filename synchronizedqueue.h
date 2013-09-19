@@ -9,7 +9,6 @@
 #include <boost/chrono.hpp>
 
 using boost::lock_guard;
-template <class T>
 class SynchronizedQueue
 {
 public:
@@ -18,12 +17,12 @@ public:
 
     }
 
-    void push_back(const T& item)
+    void push_back(const boost::any& item)
     {
         lock_guard<boost::mutex> lock(mMutex);
         mList.push_back(item);
     }
-    void push_front(const T& item)
+    void push_front(const boost::any& item)
     {
         lock_guard<boost::mutex> lock(mMutex);
         mList.push_front(item);
@@ -53,7 +52,7 @@ public:
 
 private:
     boost::mutex mMutex;
-    std::list<T> mList;
+    std::list<boost::any> mList;
 };
 
 #endif // SYNCHRONIZEDQUEUE_H

@@ -2,21 +2,28 @@
 #include <Wt/WLabel>
 #include <Wt/WScrollArea>
 #include <Wt/WBoxLayout>
+#include <Wt/WApplication>
 #include <sstream>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/local_time/local_time.hpp>
 #include <boost/chrono.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/foreach.hpp>
 #include "chathistory.h"
 #include "historyentry.h"
 #include "logger.h"
 #include "Utils/formattingutils.h"
 #include "firsthistoryentry.h"
-
+#include "History/historymanager.h"
+#include "History/parsedhistoryentry.h"
 using namespace FormattingUtils;
 
-ChatHistory::ChatHistory(std::string targetName, Wt::WContainerWidget *parent)
+ChatHistory::ChatHistory(const unsigned int ownerUin, const unsigned int talkingWith, std::string targetName, Wt::WContainerWidget *parent)
+    :
+      mOwnerUin(ownerUin),
+      mTalkingWith(talkingWith)
 {
+
     mpParent = parent;
     mTargetName = targetName;
     mpScrollArea = new Wt::WScrollArea();
@@ -30,10 +37,34 @@ ChatHistory::ChatHistory(std::string targetName, Wt::WContainerWidget *parent)
     mIsFirstEntryEver = true;
 
     auto cell = mpTable->elementAt(0,0);
-    cell->addWidget(new FirstHistoryEntry(cell));
+    auto fhe = new FirstHistoryEntry(cell);
+    fhe->clicked().connect(boost::bind(&ChatHistory::onHistoryRequest,this));
+    cell->addWidget(fhe);
+
+}
+void ChatHistory::handleParsedHistoryEntries(const std::list<ParsedHistoryEntry> &entries)
+{
+    mpTable->deleteRow(0);
+    BOOST_REVERSE_FOREACH(const ParsedHistoryEntry& entry,entries)
+    {
+        auto cell = mpTable->insertRow(0)->elementAt(0);
+        if(entry.isReceived)
+        {
+            cell->addWidget(HistoryEntry::createTargetEntryDateNickname(FormattingUtils::dateToStr(entry.time),mTargetName,entry.content,cell));
+        }
+        else
+        {
+            cell->addWidget(HistoryEntry::createMyEntryDateNickname(FormattingUtils::dateToStr(entry.time),"Ja",entry.content,cell));
+        }
+
+    }
 
 }
 
+void ChatHistory::onHistoryRequest()
+{
+    HistoryManager::requestHistory(this,mOwnerUin,mTalkingWith, Wt::WApplication::instance()->sessionId());
+}
 
 void ChatHistory::updateScrollbar()
 {
@@ -53,7 +84,7 @@ void ChatHistory::updateLastTimeStamp()
 bool ChatHistory::shouldEntryHaveTimeStamp(boost::posix_time::ptime timeNow)
 {
     boost::posix_time::time_duration timeSinceLastMessage = timeNow - mLastHistoryEntryTimeStamp;
-    if(timeSinceLastMessage.seconds() > 0)
+    if(timeSinceLastMessage.seconds() != 0)
     {
         updateLastTimeStamp();
         return true;
@@ -101,11 +132,10 @@ void ChatHistory::addSentMessage(std::string &message)
 
 }
 
-void ChatHistory::AddNewRecvHistoryEntry(std::string &message)
+void ChatHistory::AddNewRecvHistoryEntry(std::string &message, const boost::posix_time::ptime &time)
 {
-    boost::posix_time::ptime timeNow = boost::posix_time::second_clock::local_time();
-    std::string timeAsText = dateToText(timeNow);
-    bool includeTimeStamp = shouldEntryHaveTimeStamp(timeNow);
+    std::string timeAsText = dateToText(time);
+    bool includeTimeStamp = shouldEntryHaveTimeStamp(time);
     auto cell = mpTable->elementAt(mpTable->rowCount(),0);
     bool includeNick = (mIsFirstEntryEver || mWasLastMessageMine);
 
@@ -120,9 +150,9 @@ void ChatHistory::AddNewRecvHistoryEntry(std::string &message)
     mIsFirstEntryEver = false;
 }
 
-void ChatHistory::addRecvMessage(unsigned int fromUin, std::string &content)
+void ChatHistory::addRecvMessage(unsigned int fromUin, std::string &content, const boost::posix_time::ptime &time)
 {
-    AddNewRecvHistoryEntry(content);
+    AddNewRecvHistoryEntry(content,time);
 
     updateScrollbar();
 }

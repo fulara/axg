@@ -61,7 +61,6 @@ void DialogWindowHolder::onTabClosed(int index)
 
 void DialogWindowHolder::activeChanged(int index)
 {
-    Logger::log("Index changed..");
 
 
     if(mCurrentlyActiveWindow != 0)

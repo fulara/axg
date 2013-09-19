@@ -34,7 +34,6 @@ std::string fromUtf8(const std::string &utf8)
         initializeMap();
     Wt::WString str(Wt::WString::fromUTF8(utf8));
     std::string encoded = boost::locale::conv::from_utf(str.operator std::wstring(),"Latin2");
-    Logger::log("Inside frm utf...");
     for(auto it = encoded.begin(); it != encoded.end(); ++it)
     {
         auto findIt = latin1ToGG.find((int)*it);

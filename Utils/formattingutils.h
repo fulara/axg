@@ -8,6 +8,8 @@ namespace FormattingUtils
 std::string dateToStr(const boost::posix_time::ptime &time);
 std::string dateToTimeStr(const boost::posix_time::ptime &time);
 std::string dateToDayStr(const boost::posix_time::ptime &time);
+
+boost::posix_time::ptime parseTime(const std::string& timeAsStr);
 };
 
 #endif // FORMATTINGUTILS_H

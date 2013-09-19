@@ -39,7 +39,6 @@ void ContactList::addContact(unsigned int uin, std::string showName)
     ContactEntry *entry = new ContactEntry(uin,showName);
     entry->clicked().connect(std::bind([=]()
     {
-        Logger::log("Entry Clicked..");
         onEntryClicked(entry);
     }));
     addToContactList(entry);
@@ -99,7 +98,6 @@ Wt::Signal<ContactInfo> &ContactList::openContactForceOpenRequest()
 
 void ContactList::handleNewContactInfoRequest(unsigned int uin)
 {
-    Logger::log("HandleNewContactInfoRequest");
     if(!findContactAndEmitInfo(uin))
     {
         createAnonymousContact(uin);
