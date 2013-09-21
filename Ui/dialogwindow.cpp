@@ -19,6 +19,7 @@
 #include "TypingNotificationEvent.h"
 #include "menuitemupdater.h"
 #include "History/historymanager.h"
+#include "contactinfo.h"
 DialogWindow::DialogWindow(unsigned int userUin, unsigned int targetUin, std::string targetName, Wt::WContainerWidget *parent)
     :
       Wt::WContainerWidget(parent),
@@ -66,6 +67,8 @@ void DialogWindow::initAndConnectSignals()
     mpSendMessageButton->clicked().connect(this,&DialogWindow::onSendButton);
     mpSendMessageSignal = new Wt::Signal<unsigned int, std::string>(this);
     mpSendTypingNotificationSignal = new Wt::Signal<unsigned int, int>(this);
+    mpNewUnreadMessageSignal = new Wt::Signal<ContactInfo, unsigned int>(this);
+    mpMessagesReadSignal = new Wt::Signal<unsigned int>(this);
     mpTextLengthUpdateSignal = new Wt::JSignal<int>(this,"TextLengthUpdateSignal");
     mpTextLengthUpdateSignal->connect(this,&DialogWindow::onTextLengthUpdate);
 }
@@ -110,6 +113,8 @@ void DialogWindow::activated()
 {
     mIsActive = true;
     mpMenuItemUpdater->parentGainedFocus();
+    if(mUnreadMsgCount)
+        mpMessagesReadSignal->emit(mTargetUin);
     mUnreadMsgCount = 0;
 
 }
@@ -152,6 +157,7 @@ void DialogWindow::messageReceived(MessageEvent *ev)
     if(!mIsActive)
     {
         ++mUnreadMsgCount;
+        mpNewUnreadMessageSignal->emit(ContactInfo(mTargetUin,mTargetName,"",false,false,false),mUnreadMsgCount);
         mpMenuItemUpdater->onMessageRcv(mUnreadMsgCount);
     }
 }
@@ -174,4 +180,11 @@ Wt::Signal<unsigned int, int> &DialogWindow::sendTypingNotificationRequest()
 {
     return *mpSendTypingNotificationSignal;
 }
-
+Wt::Signal<ContactInfo,unsigned int> &DialogWindow::newUnreadMessage()
+{
+    return *mpNewUnreadMessageSignal;
+}
+Wt::Signal<unsigned int> &DialogWindow::messagesRead()
+{
+    return *mpMessagesReadSignal;
+}

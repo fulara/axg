@@ -2,6 +2,7 @@
 #include <boost/thread/thread.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
+#include <boost/ptr_container/ptr_map.hpp>
 #include <Wt/WServer>
 #include "historymanager.h"
 #include "synchronizedqueue.h"
@@ -100,12 +101,19 @@ void HistoryManager::clearLastChat(unsigned int ownerUin, unsigned int talkingWi
         return;
 
     std::list<ParsedHistoryEntry> entries(parseHistoryEntries(path));
+    boost::ptr_map<std::string, std::ofstream> fileHandles;
     BOOST_FOREACH(ParsedHistoryEntry &entry,entries)
     {
         if(entry.time.is_not_a_date_time())
             continue;
         std::string fileName = storagePath + "/" + FormattingUtils::dateToDayStr(entry.time);
-        std::ofstream os(fileName, std::ofstream::app);
+        auto it = fileHandles.find(fileName);
+
+        if(it == fileHandles.end())
+        {
+            fileHandles.insert(fileName, new std::ofstream(fileName,std::ofstream::app));
+        }
+        std::ofstream &os = fileHandles[fileName];
         appendEntryToFile(os,!entry.isReceived,entry.time,entry.content);
     }
     boost::filesystem::remove(path);
@@ -130,7 +138,10 @@ void HistoryManager::processPack(spHistoryPack pack)
 }
 void HistoryManager::appendEntryToFile(std::ofstream &os, bool isSent, const boost::posix_time::ptime &saveTime, const std::string &content)
 {
-    os << std::endl;
+    if(saveTime.is_not_a_date_time())
+        return;
+    if(os.tellp() != 0)
+        os << std::endl;
     os << "[" << FormattingUtils::dateToStr(saveTime) << "]";
     if(isSent)
     {

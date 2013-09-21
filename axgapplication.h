@@ -8,6 +8,7 @@ class DialogWindowHolder;
 class DialogWindow;
 class ContactList;
 class ContactWindow;
+class SiteTitleUpdater;
 #include "WtForwards.h"
 #include "Wt/WApplication"
 
@@ -31,6 +32,7 @@ private:
     ContactWindow *mpContactWindow;
     AliveChecker *mpAliveChecker;
     Wt::JSignal<void> *mpWindowUnloadSignal;
+    SiteTitleUpdater *mpSiteTitleUpdater;
     void initJSScripts();
     void initConnections();
     void multipleSessionsCheck(unsigned int uin);
@@ -41,6 +43,7 @@ private:
 /////////////////////////////////////////////
     void onWindowUnload();
     void onQuitRequested();
+    void onTitleUpdateRequest(std::string newTitle);
     void onEvent(boost::shared_ptr<Event>);
     void onEventUIThread(boost::shared_ptr<Event>);
     void onLoginResult(boost::shared_ptr<Event> event);

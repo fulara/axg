@@ -181,7 +181,7 @@ void GGWrapper::onRecvContacts(gg_event_userlist100_reply& data)
     auto groups = contactBookNode.child("Groups");
     auto contacts = contactBookNode.child("Contacts");
     std::list<ContactGroup> groupList;
-    std::map<std::string,std::vector<ContactInfo>> mapContacts;
+    std::map<std::string,std::multiset<ContactInfo>> mapContacts;
     for(auto it = contacts.begin(); it != contacts.end(); ++it)
     {
         std::string guid = it->child("Guid").child_value(); // dunno what it is
@@ -195,7 +195,7 @@ void GGWrapper::onRecvContacts(gg_event_userlist100_reply& data)
         bool isNormal = convertSBMap[it->child("FlagNormal").child_value()];
         bool isFriend = convertSBMap[it->child("FlagFriend").child_value()];
         std::string groupId = it->child("Groups").child("GroupId").child_value();
-        mapContacts[groupId].push_back(ContactInfo(uin,showName,nickName,isBuddy,isNormal,isFriend));
+        mapContacts[groupId].insert(ContactInfo(uin,showName,nickName,isBuddy,isNormal,isFriend));
     }
     for(auto it = groups.begin(); it != groups.end(); ++it)
     {

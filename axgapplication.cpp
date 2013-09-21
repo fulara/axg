@@ -27,7 +27,7 @@
 #include "Ui/contactwindow.h"
 
 #include "History/historymanager.h"
-
+#include "sitetitleupdater.h"
 using namespace Wt;
 
 
@@ -45,7 +45,8 @@ AxgApplication::AxgApplication(const Wt::WEnvironment& env)
 
     mpAliveChecker(new AliveChecker(root())),
 
-    mpWindowUnloadSignal(new Wt::JSignal<void>(this,"WindowUnloadSignal"))
+    mpWindowUnloadSignal(new Wt::JSignal<void>(this,"WindowUnloadSignal")),
+    mpSiteTitleUpdater(new SiteTitleUpdater(this))
 {
     enableUpdates();
     setTitle("AxG");
@@ -58,15 +59,33 @@ AxgApplication::AxgApplication(const Wt::WEnvironment& env)
 
 
     this->useStyleSheet("style/style.css");
+
+    mpSiteTitleUpdater->titleUpdateRequest().connect(this,&AxgApplication::onTitleUpdateRequest);
 }
 AxgApplication::~AxgApplication()
 {
     delete mpWindowUnloadSignal;
     delete mpWrapper;
 }
+void AxgApplication::onTitleUpdateRequest(std::string newTitle)
+{
+    doJavaScript("window.blinkOn = true");
+    if(newTitle.empty())
+    {
+        newTitle = "Axg";
+    }
+    else
+    {
+       newTitle = "Axg " + newTitle;
+    }
+    if(newTitle != title())
+        setTitle(Wt::WString::fromUTF8(newTitle));
+}
 
 void AxgApplication::initJSScripts()
 {
+    requireJQuery("http://code.jquery.com/jquery-1.9.1.js");
+    require("http://code.jquery.com/ui/1.10.3/jquery-ui.js");
     std::stringstream ss;
 
     ss << "window.onbeforeunload =function(){" <<mpWindowUnloadSignal->createCall() << "};";
@@ -167,6 +186,8 @@ void AxgApplication::onLoginResult(boost::shared_ptr<Event> event)
         mpDialogWindowHolder->newContactInfoRequest().connect(mpContactWindow,&ContactWindow::onNewContactInfoRequest);
         mpDialogWindowHolder->sendMessageRequest().connect(mpWrapper,&GGWrapper::sendMessage);
         mpDialogWindowHolder->sendTypingNotificationRequest().connect(mpWrapper,&GGWrapper::sendTypingNotification);
+        mpDialogWindowHolder->newUnreadMessage().connect(mpSiteTitleUpdater,&SiteTitleUpdater::newUnreadMessage);
+        mpDialogWindowHolder->messagesRead().connect(mpSiteTitleUpdater,&SiteTitleUpdater::messagesRead);
     }
     else
     {

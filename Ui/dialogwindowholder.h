@@ -21,7 +21,10 @@ public:
     Wt::Signal<unsigned int> &newContactInfoRequest();
     Wt::Signal<unsigned int, std::string> &sendMessageRequest();
     Wt::Signal<unsigned int, int> &sendTypingNotificationRequest();
-
+    Wt::Signal<ContactInfo,unsigned int>& newUnreadMessage();
+    Wt::Signal<unsigned int> &messagesRead();
+    void enableJQuerySortable(std::string menuId);
+    void connectSignalsFromNewDialog(DialogWindow* newDialogWindow);
 private:
 
     const unsigned int mUserUin;
@@ -29,6 +32,8 @@ private:
     Wt::Signal<unsigned int> *mpNewContactInfoRequest;
     Wt::Signal<unsigned int, std::string> *mpSendMessageSignal;
     Wt::Signal<unsigned int, int> *mpSendTypingNotificationSignal;
+    Wt::Signal<ContactInfo, unsigned int> *mpNewUnreadMessageSignal;
+    Wt::Signal<unsigned int> *mpMessagesReadSignal;
     std::map<unsigned int, DialogWindow*> mDialogWindows;
     DialogWindow *mCurrentlyActiveWindow;
 
@@ -39,6 +44,8 @@ private:
     DialogWindow* getDialogWindowById(unsigned int targetUin);
     void sendMessageForward(unsigned int targetUin,const std::string& msg);
     void forwardNotificationRequest(unsigned int targetUin, int length);
+    void forwardUnreadMessagesSignal(ContactInfo info, unsigned int msgCount);
+    void forwardMessagesReadSignal(unsigned int uin);
 
 };
 

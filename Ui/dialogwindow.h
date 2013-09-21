@@ -6,6 +6,7 @@ class MessageEvent;
 class TypingNotificationEvent;
 class ContactImportEvent;
 class MenuItemUpdater;
+struct ContactInfo;
 #include "WtForwards.h"
 
 #include <Wt/WContainerWidget>
@@ -19,6 +20,8 @@ public:
 
     Wt::Signal<unsigned int,std::string> &sendMessageRequest();
     Wt::Signal<unsigned int, int> &sendTypingNotificationRequest();
+    Wt::Signal<ContactInfo,unsigned int>& newUnreadMessage();
+    Wt::Signal<unsigned int> &messagesRead();
 
     void activated();
     void deactivated();
@@ -26,8 +29,8 @@ public:
     void focusOnTextArea();
     void messageReceived(MessageEvent *ev);
     void handleTypingNotificationEvent(TypingNotificationEvent *ev);
-
     void onSendRequest(std::string narrowed);
+
 private:
     bool mIsActive;
     unsigned int mUserUin;
@@ -46,6 +49,8 @@ private:
 
     Wt::Signal<unsigned int, std::string> *mpSendMessageSignal;
     Wt::Signal<unsigned int, int> *mpSendTypingNotificationSignal;
+    Wt::Signal<ContactInfo, unsigned int> *mpNewUnreadMessageSignal;
+    Wt::Signal<unsigned int> *mpMessagesReadSignal;
     Wt::JSignal<std::string> *mpTextAreaEnterSignal;
     Wt::JSignal<int> *mpTextLengthUpdateSignal;
 

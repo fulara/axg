@@ -1,5 +1,7 @@
 #include <Wt/WTabWidget>
 #include <Wt/WMenuItem>
+#include <Wt/WMenu>
+#include <Wt/WText>
 #include <boost/functional.hpp>
 #include <boost/foreach.hpp>
 #include <exception>
@@ -17,7 +19,9 @@ DialogWindowHolder::DialogWindowHolder(const unsigned int userUin, Wt::WContaine
       mpTabWidget(new Wt::WTabWidget(this)),
       mpNewContactInfoRequest(new Wt::Signal<unsigned int>(this)),
       mpSendMessageSignal(new Wt::Signal<unsigned int, std::string>(this)),
-      mpSendTypingNotificationSignal(new Wt::Signal<unsigned int, int>(this))
+      mpSendTypingNotificationSignal(new Wt::Signal<unsigned int, int>(this)),
+      mpNewUnreadMessageSignal(new Wt::Signal<ContactInfo, unsigned int>(this)),
+      mpMessagesReadSignal(new Wt::Signal<unsigned int>(this))
 {
     setStyleClass("DialogWindowHolder");
     mpTabWidget->tabClosed().connect(this,&DialogWindowHolder::onTabClosed);
@@ -140,15 +144,31 @@ DialogWindow* DialogWindowHolder::openDialogWindow(ContactInfo contactinfo)
 
 
 }
+void DialogWindowHolder::enableJQuerySortable(std::string menuId)
+{
+    std::stringstream ss;
+
+    ss << "$(\"#" << menuId << "\").sortable()";
+    doJavaScript(ss.str());
+}
+
+void DialogWindowHolder::connectSignalsFromNewDialog(DialogWindow* newDialogWindow)
+{
+    newDialogWindow->sendMessageRequest().connect(this,&DialogWindowHolder::sendMessageForward);
+    newDialogWindow->sendTypingNotificationRequest().connect(this, &DialogWindowHolder::forwardNotificationRequest);
+    newDialogWindow->newUnreadMessage().connect(this,&DialogWindowHolder::forwardUnreadMessagesSignal);
+    newDialogWindow->messagesRead().connect(this,&DialogWindowHolder::forwardMessagesReadSignal);
+}
+
 DialogWindow *DialogWindowHolder::createNewDialogWindow(ContactInfo contactInfo)
 {
     DialogWindow* newDialogWindow = new DialogWindow(mUserUin,contactInfo.uin,contactInfo.getDisplayName());
-    newDialogWindow->sendMessageRequest().connect(this,&DialogWindowHolder::sendMessageForward);
-    newDialogWindow->sendTypingNotificationRequest().connect(this, &DialogWindowHolder::forwardNotificationRequest);
+    connectSignalsFromNewDialog(newDialogWindow);
     mDialogWindows.insert(std::make_pair(contactInfo.uin,newDialogWindow));
     auto menuItem = mpTabWidget->addTab(newDialogWindow,contactInfo.getDisplayName(),Wt::WTabWidget::PreLoading);
+    std::string menuId = menuItem->parentMenu()->id();
+    enableJQuerySortable(menuId);
     menuItem->setCloseable(true);
-
     newDialogWindow->updateMenuItem(menuItem);
     return newDialogWindow;
 }
@@ -182,8 +202,26 @@ Wt::Signal<unsigned int, int> &DialogWindowHolder::sendTypingNotificationRequest
 {
     return *mpSendTypingNotificationSignal;
 }
+Wt::Signal<ContactInfo,unsigned int>& DialogWindowHolder::newUnreadMessage()
+{
+    return *mpNewUnreadMessageSignal;
+}
+
+Wt::Signal<unsigned int> &DialogWindowHolder::messagesRead()
+{
+    return *mpMessagesReadSignal;
+}
 
 void DialogWindowHolder::sendMessageForward(unsigned int targetUin, const std::string &msg)
 {
     mpSendMessageSignal->emit(targetUin,msg);
+}
+
+void DialogWindowHolder::forwardUnreadMessagesSignal(ContactInfo info, unsigned int msgCount)
+{
+    mpNewUnreadMessageSignal->emit(info,msgCount);
+}
+void DialogWindowHolder::forwardMessagesReadSignal(unsigned int uin)
+{
+    mpMessagesReadSignal->emit(uin);
 }

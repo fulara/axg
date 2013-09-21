@@ -15,4 +15,5 @@ namespace Wt
     class WBoxLayout;
     class WMenuItem;
     class WStackedWidget;
+    class WPanel;
 }

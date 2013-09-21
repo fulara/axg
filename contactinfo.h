@@ -3,6 +3,8 @@
 
 #include <map>
 #include <string>
+#include <boost/algorithm/string.hpp>
+
 struct ContactInfo
 {
 public:
@@ -11,7 +13,7 @@ public:
     {
 
     }
-    std::string getDisplayName()
+    std::string getDisplayName() const
     {
         if(showName.empty())
         {
@@ -25,6 +27,16 @@ public:
             }
         }
         return showName;
+    }
+    bool operator==(const ContactInfo& other) const
+    {
+        return uin == other.uin;
+    }
+    bool operator<(const ContactInfo& other) const
+    {
+        std::string c1 = boost::algorithm::to_lower_copy(getDisplayName());
+        std::string c2 = boost::algorithm::to_lower_copy(other.getDisplayName());
+        return c1 < c2;
     }
 
     unsigned int uin;

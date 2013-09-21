@@ -23,7 +23,8 @@ SOURCES += main.cpp \
     Ui/menuitemupdater.cpp \
     History/historymanager.cpp \
     Utils/formattingutils.cpp \
-    Ui/firsthistoryentry.cpp
+    Ui/firsthistoryentry.cpp \
+    sitetitleupdater.cpp
 
 
 
@@ -65,7 +66,8 @@ HEADERS += \
     Ui/firsthistoryentry.h \
     History/HistoryRequest.h \
     History/parsedhistoryentry.h \
-    History/LoginPackage.h
+    History/LoginPackage.h \
+    sitetitleupdater.h
 
 
 

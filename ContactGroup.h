@@ -1,11 +1,11 @@
 #ifndef CONTACTGROUP_H
 #define CONTACTGROUP_H
 #include <string>
-#include <vector>
+#include <set>
 #include "contactinfo.h"
 struct ContactGroup
 {
-    ContactGroup(bool isExpanded, bool isRemovable, std::string name, std::vector<ContactInfo>& contacts)
+    ContactGroup(bool isExpanded, bool isRemovable, std::string name, std::multiset<ContactInfo>& contacts)
         : isExpanded(isExpanded), isRemovable(isRemovable), name(name), contacts(contacts)
     {
 
@@ -15,11 +15,19 @@ struct ContactGroup
     {
 
     }
+    bool operator<(const ContactGroup &other) const
+    {
+        return name < other.name;
+    }
+    bool operator==(const ContactGroup &other) const
+    {
+        return name == other.name;
+    }
 
     bool isExpanded;
     bool isRemovable;
     std::string name;
-    std::vector<ContactInfo> contacts;
+    std::multiset<ContactInfo> contacts;
 };
 
 #endif // CONTACTGROUP_H
