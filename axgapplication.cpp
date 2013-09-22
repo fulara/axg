@@ -46,6 +46,7 @@ AxgApplication::AxgApplication(const Wt::WEnvironment& env)
     mpAliveChecker(new AliveChecker(root())),
 
     mpWindowUnloadSignal(new Wt::JSignal<void>(this,"WindowUnloadSignal")),
+    mpWindowFocusChange(new Wt::JSignal<std::string>(this,"WindowFocusChangeSignal")),
     mpSiteTitleUpdater(new SiteTitleUpdater(this))
 {
     enableUpdates();
@@ -69,6 +70,7 @@ AxgApplication::~AxgApplication()
 }
 void AxgApplication::onTitleUpdateRequest(std::string newTitle)
 {
+
     doJavaScript("window.blinkOn = true");
     if(newTitle.empty())
     {
@@ -89,7 +91,14 @@ void AxgApplication::initJSScripts()
     std::stringstream ss;
 
     ss << "window.onbeforeunload =function(){" <<mpWindowUnloadSignal->createCall() << "};";
-    doJavaScript(ss.str());
+    ss << "$(window).on(\"blur focus\",function(e) {";
+    ss << "var prevType = $(this).data(\"prevFocusChangeType\");";
+    ss << "if( prevType != e.type){ " << mpWindowFocusChange->createCall("e.type") << "}";
+    ss << "$(this).data(\"prevFocusChangeType\",e.type);";
+    ss <<"})";
+
+    //dAutoJavaScript(ss.str());
+    declareJavaScriptFunction("InitJSSScripts",ss.str());
 
     require("./scripts/globals.js");
 }
@@ -103,16 +112,25 @@ void AxgApplication::initConnections()
     mpLoginWindow->loginSignal().connect(mpWrapper,&GGWrapper::connect);
     #endif
     mpAliveChecker->died().connect(this,&AxgApplication::onQuitRequested);
-
+    mpWindowFocusChange->connect(this,&AxgApplication::onWindowFocusChange);
 }
 
 
 void AxgApplication::onWindowUnload()
 {
     //Logger::log("Unload called \n");
-    //quit();
+    quit();
 
 }
+void AxgApplication::onWindowFocusChange(std::string newState)
+{
+    if(newState == "focus")
+        mpSiteTitleUpdater->siteGainedFocus();
+    else
+        mpSiteTitleUpdater->siteLostFocus();
+
+}
+
 void AxgApplication::finalize()
 {
     WApplication::finalize();

@@ -2,6 +2,7 @@
 #define SITETITLEUPDATER_H
 #include <WtForwards.h>
 struct ContactInfo;
+class AsyncUiTimer;
 #include <vector>
 #include <string>
 #include <Wt/WObject>
@@ -15,15 +16,19 @@ public:
 
     Wt::Signal<std::string> &titleUpdateRequest();
 
+    void siteGainedFocus();
+    void siteLostFocus();
     void messagesRead(unsigned int uin);
     void newUnreadMessage(ContactInfo ci,unsigned int messageCount);
 private:
+    bool mSiteHasFocus;
     unsigned int mCurrentIndex;
     Wt::Signal<std::string> *mpTitleUpdateRequest;
-    Wt::WTimer *mpTimer;
     std::vector<CIIntPair> mUpdateClients;
+    AsyncUiTimer *mpTimer;
 
     void onTimeout();
+    void clearZeroCountPairs();
 
 };
 

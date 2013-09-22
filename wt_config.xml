@@ -90,7 +90,7 @@
 	       When a session remains inactive for this amount of time, it is
 	       cleaned up.
 	      -->
-	    <timeout>5</timeout>
+	    <timeout>50000</timeout>
 
 	    <!-- Server push timeout (seconds).
 
@@ -101,7 +101,7 @@
                periodically and issues a new one. This timeout sets
                the frequency.
 	      -->
-	    <server-push-timeout>50</server-push-timeout>
+	    <server-push-timeout>5000</server-push-timeout>
 	</session-management>
 
 	<!-- Settings that apply only to the FastCGI connector.

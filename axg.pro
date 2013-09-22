@@ -24,7 +24,8 @@ SOURCES += main.cpp \
     History/historymanager.cpp \
     Utils/formattingutils.cpp \
     Ui/firsthistoryentry.cpp \
-    sitetitleupdater.cpp
+    sitetitleupdater.cpp \
+    Utils/asynuitimer.cpp
 
 
 
@@ -67,7 +68,8 @@ HEADERS += \
     History/HistoryRequest.h \
     History/parsedhistoryentry.h \
     History/LoginPackage.h \
-    sitetitleupdater.h
+    sitetitleupdater.h \
+    Utils/asynuitimer.h
 
 
 

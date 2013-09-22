@@ -1,5 +1,6 @@
-#include <Wt/WTimer>
+#include <Wt/WApplication>
 #include <boost/lexical_cast.hpp>
+#include "Utils/asynuitimer.h"
 #include "sitetitleupdater.h"
 #include "contactinfo.h"
 #include "logger.h"
@@ -7,12 +8,9 @@ SiteTitleUpdater::SiteTitleUpdater(Wt::WObject *parent)
     : Wt::WObject(parent)
 {
     mpTitleUpdateRequest = new Wt::Signal<std::string>(this);
-    mpTimer = new Wt::WTimer(this);
-    mpTimer->setInterval(1000);
-    mpTimer->setSingleShot(false);;
-    mpTimer->timeout().connect(this,&SiteTitleUpdater::onTimeout);
-    mpTimer->start();
+    mpTimer = new AsyncUiTimer(1000,Wt::WApplication::instance()->sessionId(),boost::bind(&SiteTitleUpdater::onTimeout,this),this);
     mCurrentIndex = 0;
+    mSiteHasFocus = true;
 }
 
 void SiteTitleUpdater::messagesRead(unsigned int uin)
@@ -27,15 +25,13 @@ void SiteTitleUpdater::messagesRead(unsigned int uin)
             auto it = mUpdateClients.begin();
             std::advance(it,i);
             mUpdateClients.erase(it);
-            Logger::log("Did enter here");
         }
-        Logger::log(std::string("This Uin") + boost::lexical_cast<std::string>(pair.first.uin) + " Checking Against " + boost::lexical_cast<std::string>(uin));
     }
-
-    Logger::log(std::string("mUpdateClients size ..") + boost::lexical_cast<std::string>(mUpdateClients.size()));
 }
 void SiteTitleUpdater::newUnreadMessage(ContactInfo ci,unsigned int messageCount)
 {
+    if(messageCount == 0 && mSiteHasFocus)
+        return;
     for(unsigned int i = 0 ; i < mUpdateClients.size(); ++i)
     {
         CIIntPair &pair = mUpdateClients[i];
@@ -46,6 +42,31 @@ void SiteTitleUpdater::newUnreadMessage(ContactInfo ci,unsigned int messageCount
         }
     }
     mUpdateClients.push_back(std::make_pair(ci,messageCount));
+}
+void SiteTitleUpdater::clearZeroCountPairs()
+{
+    for(unsigned int i = 0 ; i < mUpdateClients.size(); ++i)
+    {
+        CIIntPair pair = mUpdateClients[i];
+        if(pair.second == 0)
+        {
+            if(i <= mCurrentIndex && i > 0)
+                --mCurrentIndex;
+            auto it = mUpdateClients.begin();
+            std::advance(it,i);
+            mUpdateClients.erase(it);
+        }
+    }
+}
+void SiteTitleUpdater::siteGainedFocus()
+{
+    mSiteHasFocus = true;
+    clearZeroCountPairs();
+}
+void SiteTitleUpdater::siteLostFocus()
+{
+    mSiteHasFocus = false;
+
 }
 
 void SiteTitleUpdater::onTimeout()
@@ -61,9 +82,21 @@ void SiteTitleUpdater::onTimeout()
         return;
     }
     CIIntPair pair = mUpdateClients[mCurrentIndex];
-    mpTitleUpdateRequest->emit(pair.first.getDisplayName() +"(" + boost::lexical_cast<std::string>(pair.second) + ")");
-}
+    std::string newTitle = "(";
+    newTitle += boost::lexical_cast<std::string>(mUpdateClients.size());
+    newTitle += ") ";
+    newTitle += pair.first.getDisplayName();
 
+    if(pair.second)
+    {
+        mpTitleUpdateRequest->emit(newTitle +" [" + boost::lexical_cast<std::string>(pair.second) + "]");
+    }
+    else
+    {
+        mpTitleUpdateRequest->emit(newTitle);
+    }
+
+}
 Wt::Signal<std::string> &SiteTitleUpdater::titleUpdateRequest()
 {
     return *mpTitleUpdateRequest;

@@ -160,6 +160,10 @@ void DialogWindow::messageReceived(MessageEvent *ev)
         mpNewUnreadMessageSignal->emit(ContactInfo(mTargetUin,mTargetName,"",false,false,false),mUnreadMsgCount);
         mpMenuItemUpdater->onMessageRcv(mUnreadMsgCount);
     }
+    else
+    {
+        mpNewUnreadMessageSignal->emit(ContactInfo(mTargetUin,mTargetName,"",false,false,false),0);
+    }
 }
 void DialogWindow::handleTypingNotificationEvent(TypingNotificationEvent *ev)
 {

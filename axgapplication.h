@@ -32,6 +32,7 @@ private:
     ContactWindow *mpContactWindow;
     AliveChecker *mpAliveChecker;
     Wt::JSignal<void> *mpWindowUnloadSignal;
+    Wt::JSignal<std::string> *mpWindowFocusChange;
     SiteTitleUpdater *mpSiteTitleUpdater;
     void initJSScripts();
     void initConnections();
@@ -42,6 +43,7 @@ private:
 ///// SLOTS
 /////////////////////////////////////////////
     void onWindowUnload();
+    void onWindowFocusChange(std::string newState);
     void onQuitRequested();
     void onTitleUpdateRequest(std::string newTitle);
     void onEvent(boost::shared_ptr<Event>);
