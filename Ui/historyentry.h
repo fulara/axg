@@ -15,6 +15,8 @@ public:
     static HistoryEntry *createTargetEntryDateNickname(const std::string date, const std::string nickname, const std::string &msg, Wt::WContainerWidget *parent);
     static HistoryEntry *createTargetEntryDate(const std::string date, const std::string &msg, Wt::WContainerWidget *parent);
     static HistoryEntry *createTargetEntry(const std::string &msg,Wt::WContainerWidget *parent);
+    static Wt::WText* createMsgWidget(const std::string &msg, HistoryEntry *newEntry);
+    static Wt::WText* wrapLinks(const Wt::WString& msgContent);
 private:
     HistoryEntry(Wt::WContainerWidget *parent);
 

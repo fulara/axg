@@ -16,7 +16,7 @@ LoginWindow::LoginWindow(Wt::WContainerWidget *parent)
     new Wt::WBreak(this);
 
     mpPassEdit = new Wt::WLineEdit(this);
-    mpPassEdit->setText("k0;3ksiemixk0;3k");
+    mpPassEdit->setText("haslo1");
     mpPassEdit->setEchoMode(Wt::WLineEdit::Password);
     new Wt::WBreak(this);
 

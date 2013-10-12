@@ -35,6 +35,7 @@ public:
     void sendTypingNotification(unsigned int targetUin, int length);
     Wt::Signal<boost::shared_ptr<Event> > &eventSignal();
 private:
+    unsigned int mOwnerUin;
     gg_session *mpSession;
     SynchronizedQueue *mpQueue;
     Wt::Signal<boost::shared_ptr<Event> > *mpEventSignal;
@@ -48,6 +49,7 @@ private:
 
     void addToEventLoop(const ggEvent&);
     void sendPing();
+    void notifyAllRcvContacts(const std::vector<unsigned int> &contacts);
 
 
     //process gg events methods.

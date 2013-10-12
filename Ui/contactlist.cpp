@@ -204,8 +204,6 @@ void ContactList::onEntryClicked(ContactEntry *invoker)
     if(mpLastEntryClicked == invoker)
     {
         findContactAndEmitForceOpenInfo(invoker->getUin());
-        //static int fak = 0;
-       // mpOpenContactSignal->emit(ContactInfo(2577961+ fak++,"Olek","Olek",false,false,false));
         mpLastEntryClicked->removeStyleClass("Highlighted");
         mpLastEntryClicked = 0;
     }

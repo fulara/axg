@@ -39,6 +39,8 @@ DialogWindow::DialogWindow(unsigned int userUin, unsigned int targetUin, std::st
     initOnKeyUpJSTextArea();
 
     focusOnTextArea();
+
+
 }
 DialogWindow::~DialogWindow()
 {
@@ -56,7 +58,7 @@ void DialogWindow::initWidgets()
     mpTextArea = new Wt::WTextArea();
     addWidget(mpTextArea);
     mpTextArea->setStyleClass("DialogWindowTextArea");
-    mpSendMessageButton = new Wt::WPushButton("Send Message To Da Guc");
+    mpSendMessageButton = new Wt::WPushButton("Send Message");
     addWidget(mpSendMessageButton);
 }
 
@@ -151,7 +153,6 @@ void DialogWindow::onTextAreaEnterPress(std::string content)
 
 void DialogWindow::messageReceived(MessageEvent *ev)
 {
-    HistoryManager::saveRcvEntry(ev->content, mUserUin, ev->fromUin);
     mpChatHistory->addRecvMessage(ev->fromUin,ev->content,ev->time);
 
     if(!mIsActive)

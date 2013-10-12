@@ -16,6 +16,10 @@ pre
 	height: 150px;
 	width: 150px;
 }
+.Wt-stack
+{
+	height: calc(100% - 35px);
+}
 .ContactWindow
 {
 	width:200px;
@@ -59,13 +63,30 @@ pre
 }
 .DialogWindowHolder
 {
+	z-index:10;
 	position: absolute;
 	left: 40%;
+	min-width:300px;
+	min-height:400px;
+}
+.DraggableDiv
+{
+	position: absolute;
+	font-size: 0.1px;
+	display:block;
+	cursor: move;
+	right: 20px;
+	bottom: 1px;
+	background-position: -0px -80px;
+	background-image: url(images/ui-icons_222222_256x240.png);
+	z-index:90;
+	width: 16px;
+	height: 16px;
 }
 .DialogWindow
 {
 	background-color:#b0c4de;
-	width:450px;
+	height: 100%
 }
 .DialogWindowMenuItemTyping a
 {
@@ -84,7 +105,8 @@ pre
 {
 	display:block;
 	resize: none;
-    	width: 90%;
+    	width: calc(100% - 35px);
+	height: 82px;
     	margin-left: auto;
     	margin-right: auto;
 }
@@ -93,8 +115,8 @@ pre
 
 	margin-left: auto;
 	margin-right: auto;
-	height:300px;
-	width:91%;
+	height: calc(100% - 135px);
+	width: calc(100% - 30px);
 	background-color:#f0f0f0;
 }
 .DialogWindowChatHistory

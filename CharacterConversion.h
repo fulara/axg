@@ -33,9 +33,11 @@ std::string fromUtf8(const std::string &utf8)
     if(!isMapInitialized)
         initializeMap();
     Wt::WString str(Wt::WString::fromUTF8(utf8));
-    std::string encoded = boost::locale::conv::from_utf(str.operator std::wstring(),"Latin2");
+    return utf8;
+    std::string encoded = boost::locale::conv::from_utf(str.operator std::wstring(),"Latin1");
     for(auto it = encoded.begin(); it != encoded.end(); ++it)
     {
+        break;
         auto findIt = latin1ToGG.find((int)*it);
         if(findIt != latin1ToGG.end())
         {
@@ -47,18 +49,20 @@ std::string fromUtf8(const std::string &utf8)
 
 std::string toUtf8(const std::string &msg)
 {
+    return msg;
     if(!isMapInitialized)
         initializeMap();
     auto encoded = msg;
     for(auto it = encoded.begin(); it != encoded.end(); ++it)
     {
+        break;
         auto findIt = ggToLatin1.find((int)*it);
         if(findIt != ggToLatin1.end())
         {
             *it = findIt->second;
         }
     }
-    std::wstring wstr = boost::locale::conv::to_utf<wchar_t>(encoded,"Latin2");
+    std::wstring wstr = boost::locale::conv::to_utf<wchar_t>(encoded,"Latin1");
     return Wt::WString(wstr).toUTF8();
 }
 }

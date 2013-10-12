@@ -8,7 +8,7 @@ SiteTitleUpdater::SiteTitleUpdater(Wt::WObject *parent)
     : Wt::WObject(parent)
 {
     mpTitleUpdateRequest = new Wt::Signal<std::string>(this);
-    mpTimer = new AsyncUiTimer(1000,Wt::WApplication::instance()->sessionId(),boost::bind(&SiteTitleUpdater::onTimeout,this),this);
+    mpTimer = new AsyncUiTimer(500,Wt::WApplication::instance()->sessionId(),boost::bind(&SiteTitleUpdater::onTimeout,this),this);
     mCurrentIndex = 0;
     mSiteHasFocus = true;
 }

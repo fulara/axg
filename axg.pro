@@ -25,7 +25,8 @@ SOURCES += main.cpp \
     Utils/formattingutils.cpp \
     Ui/firsthistoryentry.cpp \
     sitetitleupdater.cpp \
-    Utils/asynuitimer.cpp
+    Utils/asynuitimer.cpp \
+    Ui/draggablediv.cpp
 
 
 
@@ -69,7 +70,8 @@ HEADERS += \
     History/parsedhistoryentry.h \
     History/LoginPackage.h \
     sitetitleupdater.h \
-    Utils/asynuitimer.h
+    Utils/asynuitimer.h \
+    Ui/draggablediv.h
 
 
 
@@ -180,3 +182,5 @@ INCLUDEPATH += $$PWD/../../../libs/pugixml/includes
 DEPENDPATH += $$PWD/../../../libs/pugixml/includes
 
 unix:!macx: PRE_TARGETDEPS += $$PWD/../../../libs/pugixml/libpugixml.a
+
+

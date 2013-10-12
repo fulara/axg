@@ -6,6 +6,7 @@
 #include <boost/thread.hpp>
 #include <boost/chrono.hpp>
 #include <boost/locale.hpp>
+#include <boost/foreach.hpp>
 #include <Wt/WSignal>
 
 #include <vector>
@@ -18,7 +19,7 @@
 #include "ggevent.h"
 #include "ggloginevent.h"
 #include "logger.h"
-
+#include "History/historymanager.h"
 #include "messageevent.h"
 #include "loginresultevent.h"
 #include "TypingNotificationEvent.h"
@@ -33,6 +34,7 @@
 typedef boost::shared_ptr<Event> spEvent;
 GGWrapper::GGWrapper()
     :
+      mOwnerUin(0),
       mpSession(NULL),
       mpQueue( new SynchronizedQueue()),
       mpEventSignal(new Wt::Signal<boost::shared_ptr<Event>>())
@@ -140,12 +142,15 @@ void GGWrapper::sendPing()
 
 void GGWrapper::onRecvMsg(gg_event_msg& msg)
 {
-    if(msg.msgclass & GG_CLASS_CHAT)
+    if(msg.msgclass & GG_CLASS_CHAT || msg.msgclass & GG_CLASS_MSG)
     {
         std::string message((const char*)msg.message);
         std::string decodedMsg = conversions::toUtf8(message);
-        eventSignal().emit(spEvent(new MessageEvent(msg.sender,decodedMsg,boost::posix_time::from_time_t(msg.time))));
-        Logger::log(message + " sent at " + FormattingUtils::dateToStr(boost::posix_time::from_time_t(msg.time)));
+        auto timestamp = FormattingUtils::time_tToPtime(msg.time);
+        HistoryManager::saveRcvEntry(decodedMsg,timestamp,mOwnerUin,msg.sender);
+        eventSignal().emit(spEvent(new MessageEvent(msg.sender,decodedMsg,timestamp)));
+
+        Logger::log(message + " sent at " + FormattingUtils::dateToStr(timestamp));
     }
 }
 void GGWrapper::onRecvOwnInfo(gg_event_user_data &data)
@@ -173,6 +178,7 @@ void GGWrapper::onRecvOwnInfo(gg_event_user_data &data)
 void GGWrapper::onRecvContacts(gg_event_userlist100_reply& data)
 {
     std::map<std::string,bool> convertSBMap;
+    std::vector<unsigned int> contactList;
     convertSBMap.insert(std::make_pair("true",1));
     convertSBMap.insert(std::make_pair("false",0));
     pugi::xml_document doc;
@@ -188,7 +194,9 @@ void GGWrapper::onRecvContacts(gg_event_userlist100_reply& data)
         auto ggNode = it->child("GGNumber");
         if(strlen(ggNode.child_value()) == 0)
             continue;
+
         unsigned int uin = boost::lexical_cast<unsigned int>(ggNode.child_value());
+        contactList.push_back(uin);
         std::string showName = it->child("ShowName").child_value();
         std::string nickName = it->child("NickName").child_value();
         bool isBuddy = convertSBMap[it->child("FlagBuddy").child_value()];
@@ -207,7 +215,17 @@ void GGWrapper::onRecvContacts(gg_event_userlist100_reply& data)
         groupList.push_back(ContactGroup(isExpanded,isRemovable,groupName,mapContacts[id]));
     }
 
+    notifyAllRcvContacts(contactList);
+
     mpEventSignal->emit(spEvent(new ContactImportEvent(groupList)));
+}
+void GGWrapper::notifyAllRcvContacts(const std::vector<unsigned int> &contacts)
+{
+    unsigned int * contactAr = new unsigned int [contacts.size()];
+    for(unsigned int i = 0 ; i < contacts.size(); ++i)
+        contactAr[i] = contacts[i];
+    gg_notify(mpSession,contactAr,contacts.size());
+    delete[] contactAr;
 }
 
 void GGWrapper::onRecvTypingNotification(gg_event_typing_notification& typingNotification)
@@ -218,6 +236,7 @@ void GGWrapper::onRecvTypingNotification(gg_event_typing_notification& typingNot
 void GGWrapper::processGGEvent(gg_event &ev)
 {
 
+    Logger::log("Processing Event..?");
     switch(ev.type)
     {
         case GG_EVENT_NONE:		/**< Nie wydarzylo sie nic wartego uwagi */
@@ -376,6 +395,7 @@ void GGWrapper::processEvent(ggEvent &event)
         }
         case ggEvent::MessageEvent:
         {
+
             ggMessageEvent &messageEvent = boost::any_cast<ggMessageEvent&>(event.content);
             processMessageEvent(messageEvent);
             break;
@@ -397,8 +417,13 @@ void GGWrapper::processLoginEvent(ggLoginEvent &event)
     p.uin = event.uin;
     p.password = const_cast<char *>(event.pass.c_str());
     p.async = 0;
+    p.protocol_features = GG_FEATURE_ALL | GG_FEATURE_MSG77 | GG_FEATURE_MULTILOGON;
+    p.tls = GG_SSL_ENABLED;
+    p.encoding = GG_ENCODING_UTF8;
+
     if((mpSession = gg_login(&p)) && gg_notify(mpSession,NULL,0) != -1)
     {
+        mOwnerUin = p.uin;
         eventSignal().emit(spEvent(new LoginResultEvent(true,event.uin)));
         if ( -1 != gg_userlist100_request(mpSession,GG_USERLIST100_GET,0,GG_USERLIST100_FORMAT_TYPE_GG100,0))
         {
@@ -415,7 +440,8 @@ void GGWrapper::processLoginEvent(ggLoginEvent &event)
 }
 void GGWrapper::processMessageEvent(ggMessageEvent &event)
 {
-    gg_send_message(mpSession,GG_CLASS_CHAT,event.uin,(unsigned char*)event.msg.c_str());
+    Logger::log(std::string("Sending message") + event.msg.c_str());
+    gg_send_message(mpSession,GG_CLASS_MSG,event.uin,(unsigned char*)event.msg.c_str());
 }
 
 void GGWrapper::addToEventLoop(const ggEvent &event)

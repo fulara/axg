@@ -36,7 +36,6 @@ private:
     SiteTitleUpdater *mpSiteTitleUpdater;
     void initJSScripts();
     void initConnections();
-    void multipleSessionsCheck(unsigned int uin);
     static std::clock_t begin;
 
 /////////////////////////////////////////////

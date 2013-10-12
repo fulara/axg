@@ -1,1 +1,1 @@
-./axg --http-port 1234 --http-addr 0.0.0.0 --docroot . -c ./wt_config.xml
+./axg --http-port 80 --http-addr 0.0.0.0 --docroot . -c ./wt_config.xml 2> err.out 1> std.out

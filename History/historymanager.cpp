@@ -72,11 +72,11 @@ void HistoryManager::requestHistory(ChatHistory *caller, const unsigned int owne
     manager.mpQueue->push_back(spHistoryRequest(new HistoryRequest(caller,ownerUin,talkingWith,owningSessionId)));
 }
 
-void HistoryManager::saveRcvEntry(const std::string &msg, const unsigned int userUin, const unsigned int talkingWith)
+void HistoryManager::saveRcvEntry(const std::string& msg, const boost::posix_time::ptime &timestamp,const unsigned int userUin,const unsigned int talkingWith)
 {
     HistoryManager &manager = getInstance();
 
-    manager.mpQueue->push_back(spHistoryPack(new HistoryPack(msg,userUin,talkingWith,false)));
+    manager.mpQueue->push_back(spHistoryPack(new HistoryPack(msg,timestamp,userUin,talkingWith,false)));
 }
 void HistoryManager::saveSendEntry(const std::string &msg, const unsigned int userUin, const unsigned int talkingWith)
 {
@@ -127,7 +127,11 @@ void HistoryManager::processLogin(LoginPackage loginPackage)
 void HistoryManager::processPack(spHistoryPack pack)
 {
     clearLastChat(pack->ownerUin,pack->talkingWith);
-    boost::posix_time::ptime saveTime = boost::posix_time::second_clock::local_time();
+    boost::posix_time::ptime saveTime;
+    if(pack->isSent)
+        saveTime = boost::posix_time::second_clock::local_time();
+    else
+        saveTime = pack->timestamp;
     createNeededDirectories(pack->ownerUin,pack->talkingWith);
 
     spOfstream spof(getFileAppend(getPathForHistoryStorage(pack->ownerUin,pack->talkingWith),FormattingUtils::dateToDayStr(saveTime)));

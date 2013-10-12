@@ -11,6 +11,7 @@ struct LoginPackage;
 #include <boost/thread/mutex.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/interprocess/smart_ptr/unique_ptr.hpp>
+#include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/regex.hpp>
 #include <fstream>
 #include <map>
@@ -28,7 +29,7 @@ public:
     HistoryManager(const HistoryManager&&) = delete;
     HistoryManager& operator=(const HistoryManager&) = delete;
     static void saveSendEntry(const std::string& msg,const unsigned int userUin,const unsigned int talkingWith);
-    static void saveRcvEntry(const std::string& msg,const unsigned int userUin,const unsigned int talkingWith);
+    static void saveRcvEntry(const std::string& msg, const boost::posix_time::ptime &timestamp,const unsigned int userUin,const unsigned int talkingWith);
     static void requestHistory(ChatHistory* caller, const unsigned int ownerUin, const unsigned int talkingWith, const std::string& owningSessionId);
     static void informAboutLogin(unsigned int uin);
 

@@ -37,7 +37,6 @@ AxgApplication::AxgApplication(const Wt::WEnvironment& env)
     mpWrapper(new GGWrapper()),
     #ifndef LAYOUT_TEST
     mpLoginWindow(new LoginWindow(root())),
-    mpDialogWindowHolder(new DialogWindowHolder(0,root())),
     #else
     mpDialogWindowHolder(new DialogWindowHolder(root())),
     mpContactWindow(new ContactWindow(root())),
@@ -53,13 +52,14 @@ AxgApplication::AxgApplication(const Wt::WEnvironment& env)
     setTitle("AxG");
     initConnections();
     initJSScripts();
-
 #ifdef LAYOUT_TEST
     mpContactWindow->windowOpenRequest().connect(mpDialogWindowHolder,&DialogWindowHolder::openDialogWindowRequest);
 #endif
 
 
     this->useStyleSheet("style/style.css");
+    std::stringstream ss;
+
 
     mpSiteTitleUpdater->titleUpdateRequest().connect(this,&AxgApplication::onTitleUpdateRequest);
 }
@@ -81,13 +81,17 @@ void AxgApplication::onTitleUpdateRequest(std::string newTitle)
        newTitle = "Axg " + newTitle;
     }
     if(newTitle != title())
+    {
         setTitle(Wt::WString::fromUTF8(newTitle));
+        triggerUpdate();
+    }
 }
 
 void AxgApplication::initJSScripts()
 {
-    requireJQuery("http://code.jquery.com/jquery-1.9.1.js");
-    require("http://code.jquery.com/ui/1.10.3/jquery-ui.js");
+    requireJQuery("scripts/jquery-2.0.3.min.js");
+    require("scripts/jquery-ui.min.js");
+    this->useStyleSheet("style/jquery-ui.css");
     std::stringstream ss;
 
     ss << "window.onbeforeunload =function(){" <<mpWindowUnloadSignal->createCall() << "};";
@@ -95,6 +99,7 @@ void AxgApplication::initJSScripts()
     ss << "var prevType = $(this).data(\"prevFocusChangeType\");";
     ss << "if( prevType != e.type){ " << mpWindowFocusChange->createCall("e.type") << "}";
     ss << "$(this).data(\"prevFocusChangeType\",e.type);";
+    ss << "if(e.type == 'blur') $dragging = null;";
     ss <<"})";
 
     //dAutoJavaScript(ss.str());
@@ -125,7 +130,10 @@ void AxgApplication::onWindowUnload()
 void AxgApplication::onWindowFocusChange(std::string newState)
 {
     if(newState == "focus")
+    {
         mpSiteTitleUpdater->siteGainedFocus();
+        doJavaScript("ctrlPressed=false");
+    }
     else
         mpSiteTitleUpdater->siteLostFocus();
 
@@ -197,7 +205,6 @@ void AxgApplication::onLoginResult(boost::shared_ptr<Event> event)
         delete mpLoginWindow;
         mpDialogWindowHolder = new DialogWindowHolder(loginResultEvent->uin,this->root());
         HistoryManager::informAboutLogin(loginResultEvent->uin);
-        multipleSessionsCheck(loginResultEvent->uin);
         mpContactWindow = new ContactWindow(root());
         mpContactWindow->windowOpenRequest().connect(mpDialogWindowHolder,&DialogWindowHolder::openDialogWindowRequest);
         mpContactWindow->windowOpenRequestForceActivate().connect(mpDialogWindowHolder,&DialogWindowHolder::openDialogWindowAndActivateRequest);
@@ -212,9 +219,6 @@ void AxgApplication::onLoginResult(boost::shared_ptr<Event> event)
         mpLoginWindow->reset();
         doJavaScript("alert('Failed to login NYGGA!');");
     }
-}
-void AxgApplication::multipleSessionsCheck(unsigned int uin)
-{
 }
 
 void AxgApplication::onTypingNotification(boost::shared_ptr<Event> event)

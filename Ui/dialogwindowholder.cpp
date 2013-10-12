@@ -12,6 +12,7 @@
 #include "dialogwindowholder.h"
 #include "messageevent.h"
 #include "TypingNotificationEvent.h"
+#include "draggablediv.h"
 
 DialogWindowHolder::DialogWindowHolder(const unsigned int userUin, Wt::WContainerWidget *parent)
     : Wt::WContainerWidget(parent),
@@ -23,10 +24,19 @@ DialogWindowHolder::DialogWindowHolder(const unsigned int userUin, Wt::WContaine
       mpNewUnreadMessageSignal(new Wt::Signal<ContactInfo, unsigned int>(this)),
       mpMessagesReadSignal(new Wt::Signal<unsigned int>(this))
 {
+    mpTabWidget->resize("100%","100%");
+    resize(400,400);
     setStyleClass("DialogWindowHolder");
     mpTabWidget->tabClosed().connect(this,&DialogWindowHolder::onTabClosed);
     mpTabWidget->currentChanged().connect(this,&DialogWindowHolder::activeChanged);
     mCurrentlyActiveWindow = 0;
+    new DraggableDiv(this);
+    hide();
+    std::stringstream ss;
+    ss << "$(function() {";
+    ss << "$( '#" << id() << "').resizable();";
+    ss << "});";
+    doJavaScript(ss.str());
 }
 DialogWindowHolder::~DialogWindowHolder()
 {
@@ -59,6 +69,7 @@ void DialogWindowHolder::onTabClosed(int index)
     else
     {
         activeChanged(-1);
+        hide();
     }
 
 }
@@ -140,6 +151,7 @@ DialogWindow* DialogWindowHolder::openDialogWindow(ContactInfo contactinfo)
         mpTabWidget->setCurrentIndex(index);
         return dialogWindow;
     }
+
     return createNewDialogWindow(contactinfo);
 
 
@@ -170,6 +182,7 @@ DialogWindow *DialogWindowHolder::createNewDialogWindow(ContactInfo contactInfo)
     enableJQuerySortable(menuId);
     menuItem->setCloseable(true);
     newDialogWindow->updateMenuItem(menuItem);
+    show();
     return newDialogWindow;
 }
 void DialogWindowHolder::forwardNotificationRequest(unsigned int targetUin, int length)

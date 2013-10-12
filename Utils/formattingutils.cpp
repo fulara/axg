@@ -1,5 +1,5 @@
 #include <boost/date_time/posix_time/posix_time_io.hpp>
-
+#include <boost/chrono.hpp>
 #include "formattingutils.h"
 
 #include "logger.h"
@@ -39,5 +39,11 @@ boost::posix_time::ptime parseTime(const std::string &timeAsStr)
     ss.str(timeAsStr);
     ss >> time;
     return time;
+}
+boost::posix_time::ptime time_tToPtime(const time_t &time)
+{
+    boost::posix_time::ptime ptime(boost::posix_time::from_time_t(time));
+    ptime += boost::posix_time::hours(2);
+    return boost::move(ptime);
 }
 };
